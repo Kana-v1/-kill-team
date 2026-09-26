@@ -88,6 +88,21 @@
         "id": "counteract",
         "label": "Counteracting"
       }
+    ],
+    "phases": [
+      "strategy",
+      "firefight"
+    ],
+    "when": [
+      "activation",
+      "attack",
+      "defence",
+      "any"
+    ],
+    "appliesTo": [
+      "team",
+      "self",
+      "weapons"
     ]
   },
   "effects": [
@@ -108,7 +123,10 @@
       "duration": "instant",
       "text": "After rolling your attack or defence dice, re-roll one of those dice. No limit per turning point.",
       "remind_at": [],
-      "source": "core rules"
+      "source": "core rules",
+      "when": "any",
+      "appliesTo": "team",
+      "hint": "After rolling your attack or defence dice, re-roll one of them."
     },
     {
       "id": "aod.rule.astartes",
@@ -128,7 +146,10 @@
         "activation.start": "Take TWO Shoot or TWO Fight actions (one Shoot with a bolt weapon; a second shot with the same bolt sniper rifle or heavy bolter costs +1 AP).",
         "counteract.available": "Can counteract regardless of this operative's order."
       },
-      "source": "official PDF, August '26"
+      "source": "official PDF, August '26",
+      "when": "activation",
+      "appliesTo": "team",
+      "hint": "Two Shoot or two Fight actions (one Shoot with a bolt weapon; a second shot with the same bolt sniper rifle or heavy bolter costs +1 AP). Can counteract regardless of order."
     },
     {
       "id": "aod.strat.combat_doctrine",
@@ -149,7 +170,19 @@
           "remind_at": [
             "combat.shoot.before_roll"
           ],
-          "prompt": "Balanced (re-roll one attack die) if the target is more than 6\" away."
+          "prompt": "Balanced (re-roll one attack die) if the target is more than 6\" away.",
+          "grantsWeaponRules": [
+            {
+              "match": [
+                "ranged"
+              ],
+              "rules": [
+                "Balanced"
+              ],
+              "condition": "target more than 6\" away"
+            }
+          ],
+          "hint": "Balanced (re-roll one attack die) if the target is more than 6\" away."
         },
         {
           "id": "tactical",
@@ -158,7 +191,19 @@
           "remind_at": [
             "combat.shoot.before_roll"
           ],
-          "prompt": "Balanced (re-roll one attack die) if the target is within 6\"."
+          "prompt": "Balanced (re-roll one attack die) if the target is within 6\".",
+          "grantsWeaponRules": [
+            {
+              "match": [
+                "ranged"
+              ],
+              "rules": [
+                "Balanced"
+              ],
+              "condition": "target within 6\""
+            }
+          ],
+          "hint": "Balanced (re-roll one attack die) if the target is within 6\"."
         },
         {
           "id": "assault",
@@ -168,10 +213,25 @@
             "combat.fight.before_roll",
             "combat.retaliate.before_roll"
           ],
-          "prompt": "Balanced (re-roll one attack die) when fighting or retaliating."
+          "prompt": "Balanced (re-roll one attack die) when fighting or retaliating.",
+          "grantsWeaponRules": [
+            {
+              "match": [
+                "melee"
+              ],
+              "rules": [
+                "Balanced"
+              ],
+              "condition": "fighting or retaliating"
+            }
+          ],
+          "hint": "Balanced (re-roll one attack die) when fighting or retaliating."
         }
       ],
-      "source": "official PDF, August '26"
+      "source": "official PDF, August '26",
+      "when": "attack",
+      "appliesTo": "team",
+      "hint": "Your weapons have Balanced while your doctrine's condition is met."
     },
     {
       "id": "aod.strat.and_they_shall_know_no_fear",
@@ -193,7 +253,10 @@
       "prompts": {
         "*": "Injured operatives use their NORMAL stats this turning point (weapons included)."
       },
-      "source": "official PDF, August '26"
+      "source": "official PDF, August '26",
+      "when": "any",
+      "appliesTo": "team",
+      "hint": "Injured operatives use their normal stats this turning point (weapons included)."
     },
     {
       "id": "aod.strat.indomitus",
@@ -212,7 +275,10 @@
       "prompts": {
         "*": "Two or more fails? Discard one to retain another as a normal success."
       },
-      "source": "official PDF, August '26"
+      "source": "official PDF, August '26",
+      "when": "defence",
+      "appliesTo": "team",
+      "hint": "When shot: two or more fails? Discard one to retain another as a normal success."
     },
     {
       "id": "aod.strat.adaptive_tactics",
@@ -231,7 +297,10 @@
       "prompts": {
         "turning_point.end": "Your original secondary Chapter Tactic returns now."
       },
-      "source": "official PDF, August '26"
+      "source": "official PDF, August '26",
+      "when": "any",
+      "appliesTo": "team",
+      "hint": "Swap your secondary chapter tactic until the end of the turning point."
     },
     {
       "id": "aod.ff.shock_assault",
@@ -253,7 +322,21 @@
         "*": "Shock, +1 damage on the first strike (max 7)."
       },
       "source": "official PDF, August '26",
-      "once_per": "turning_point"
+      "once_per": "turning_point",
+      "when": "attack",
+      "appliesTo": "team",
+      "hint": "Fighting after a Charge: Shock, and +1 damage on your first strike (max 7).",
+      "grantsWeaponRules": [
+        {
+          "match": [
+            "melee"
+          ],
+          "rules": [
+            "Shock"
+          ],
+          "condition": "fighting after a Charge"
+        }
+      ]
     },
     {
       "id": "aod.ff.transhuman_physiology",
@@ -272,7 +355,10 @@
         "*": "Retain one normal success as a CRITICAL success."
       },
       "source": "official PDF, August '26",
-      "once_per": "turning_point"
+      "once_per": "turning_point",
+      "when": "defence",
+      "appliesTo": "team",
+      "hint": "When shot, in the Roll Defence Dice step: retain one normal success as a critical."
     },
     {
       "id": "aod.ff.wrath_of_vengeance",
@@ -291,7 +377,10 @@
         "*": "One extra free 1AP action (different from the first)."
       },
       "source": "official PDF, August '26",
-      "once_per": "turning_point"
+      "once_per": "turning_point",
+      "when": "activation",
+      "appliesTo": "team",
+      "hint": "When counteracting: one extra free 1AP action (both actions different)."
     },
     {
       "id": "aod.ff.adjust_doctrine",
@@ -309,7 +398,10 @@
       "text": "During a friendly operative's activation, before or after an action, change the Combat Doctrine you selected this turning point.",
       "remind_at": [],
       "source": "official PDF, August '26",
-      "once_per": "turning_point"
+      "once_per": "turning_point",
+      "when": "activation",
+      "appliesTo": "team",
+      "hint": "Before or after an action: change the Combat Doctrine you selected this turning point."
     },
     {
       "id": "aod.eq.purity_seals",
@@ -330,7 +422,10 @@
       "prompts": {
         "*": "Two or more fails? Discard one to retain another as a normal success."
       },
-      "source": "official PDF, August '26"
+      "source": "official PDF, August '26",
+      "when": "attack",
+      "appliesTo": "team",
+      "hint": "Once per turning point, shooting, fighting or retaliating: two or more fails? Discard one to retain another as a normal success."
     },
     {
       "id": "aod.eq.auspex",
@@ -349,7 +444,10 @@
       "prompts": {
         "*": "Enemies within 8\" can't be obscured until the end of this activation."
       },
-      "source": "official PDF, August '26"
+      "source": "official PDF, August '26",
+      "when": "attack",
+      "appliesTo": "team",
+      "hint": "Once per turning point when shooting: enemies within 8\" of this operative can't be obscured until its activation ends."
     },
     {
       "id": "aod.eq.tilting_shields",
@@ -369,7 +467,10 @@
       "prompts": {
         "*": "Opponent can't retain results below 6 as criticals this sequence (before re-rolls)."
       },
-      "source": "official PDF, August '26"
+      "source": "official PDF, August '26",
+      "when": "defence",
+      "appliesTo": "team",
+      "hint": "Once per turning point, fighting or retaliating, after they roll: they can't retain results below 6 as criticals this sequence."
     },
     {
       "id": "aod.eq.chapter_reliquaries",
@@ -392,7 +493,10 @@
         "*": "Wrath of Vengeance is FREE if this operative has an Engage order."
       },
       "source": "official PDF, August '26",
-      "alwaysOn": true
+      "alwaysOn": true,
+      "when": "activation",
+      "appliesTo": "team",
+      "hint": "Wrath of Vengeance is free if the operative has an Engage order."
     },
     {
       "id": "aod.op.heroic_leader",
@@ -431,7 +535,10 @@
       "prompts": {
         "*": "Use Combat Doctrine now, on activation, at its normal cost (Captain in the killzone, out of enemy control range; not if you already used it this turning point)."
       },
-      "source": "official PDF, August '26"
+      "source": "official PDF, August '26",
+      "when": "any",
+      "appliesTo": "team",
+      "hint": "Once per turning point: a firefight ploy free for the Captain (not Command Re-roll), Combat Doctrine on activation, or Adjust Doctrine free."
     },
     {
       "id": "aod.op.iron_halo",
@@ -452,7 +559,10 @@
       "prompts": {
         "*": "Once per battle: ignore one attack dice's Normal Damage on the Captain."
       },
-      "source": "official PDF, August '26"
+      "source": "official PDF, August '26",
+      "when": "defence",
+      "appliesTo": "self",
+      "hint": "Once per battle: ignore one attack die's Normal Dmg on the Captain."
     },
     {
       "id": "aod.op.optics",
@@ -471,7 +581,10 @@
       "prompts": {
         "*": "1AP: until its next activation, when this operative shoots, enemies can't be obscured. Not in enemy control range."
       },
-      "source": "official PDF, August '26"
+      "source": "official PDF, August '26",
+      "when": "activation",
+      "appliesTo": "self",
+      "hint": "1AP: until its next activation, when this operative shoots, enemies can't be obscured. Not in enemy control range."
     },
     {
       "id": "aod.op.doctrine_warfare_asltsgt",
@@ -510,7 +623,10 @@
       "prompts": {
         "*": "Assault or tactical doctrine is free while the Assault Intercessor Sergeant is in the killzone (once per battle each)."
       },
-      "source": "official PDF, August '26"
+      "source": "official PDF, August '26",
+      "when": "any",
+      "appliesTo": "team",
+      "hint": "Once per battle each: Combat Doctrine is free when you pick Assault or Tactical (Sergeant in the killzone)."
     },
     {
       "id": "aod.op.doctrine_warfare_intsgt",
@@ -549,7 +665,10 @@
       "prompts": {
         "*": "Devastator or tactical doctrine is free while the Intercessor Sergeant is in the killzone (once per battle each)."
       },
-      "source": "official PDF, August '26"
+      "source": "official PDF, August '26",
+      "when": "any",
+      "appliesTo": "team",
+      "hint": "Once per battle each: Combat Doctrine is free when you pick Devastator or Tactical (Sergeant in the killzone)."
     },
     {
       "id": "aod.op.camo_cloak",
@@ -568,7 +687,10 @@
       "prompts": {
         "*": "When this operative is shot, ignore Saturate. It has Stealthy — and can use both Stealthy options if you picked it."
       },
-      "source": "official PDF, August '26"
+      "source": "official PDF, August '26",
+      "when": "defence",
+      "appliesTo": "self",
+      "hint": "When shot, ignore Saturate. Has Stealthy — and can use both Stealthy options if you picked it."
     },
     {
       "id": "aod.op.grenadier",
@@ -587,7 +709,10 @@
       "prompts": {
         "*": "Grenadier uses frag and krak grenades free of their limited uses, at +1 Hit."
       },
-      "source": "official PDF, August '26"
+      "source": "official PDF, August '26",
+      "when": "attack",
+      "appliesTo": "self",
+      "hint": "Uses frag and krak grenades free of their limited uses, at +1 Hit."
     }
   ],
   "operatives": [
@@ -1186,7 +1311,19 @@
         "combat.fight.before_roll",
         "combat.retaliate.before_roll"
       ],
-      "prompt": "Aggressive — melee weapons have Rending."
+      "prompt": "Aggressive — melee weapons have Rending.",
+      "when": "attack",
+      "hint": "Aggressive — melee weapons have Rending.",
+      "grantsWeaponRules": [
+        {
+          "match": [
+            "melee"
+          ],
+          "rules": [
+            "Rending"
+          ]
+        }
+      ]
     },
     {
       "id": "dueller",
@@ -1196,7 +1333,9 @@
         "combat.fight.after_roll",
         "combat.retaliate.after_roll"
       ],
-      "prompt": "Dueller — your normal successes can block unresolved criticals (unless the enemy weapon has Brutal)."
+      "prompt": "Dueller — your normal successes can block unresolved criticals (unless the enemy weapon has Brutal).",
+      "when": "attack",
+      "hint": "Dueller — your normal successes can block unresolved criticals (unless the enemy weapon has Brutal)."
     },
     {
       "id": "resolute",
@@ -1205,7 +1344,9 @@
       "remind_at": [
         "activation.start"
       ],
-      "prompt": "Resolute — ignore APL changes, and ignore enemy Shock."
+      "prompt": "Resolute — ignore APL changes, and ignore enemy Shock.",
+      "when": "any",
+      "hint": "Resolute — ignore APL changes, and ignore enemy Shock."
     },
     {
       "id": "stealthy",
@@ -1214,7 +1355,9 @@
       "remind_at": [
         "defence.shooting.before_roll"
       ],
-      "prompt": "Stealthy — one extra cover save, or upgrade one to a critical (not with Vantage)."
+      "prompt": "Stealthy — one extra cover save, or upgrade one to a critical (not with Vantage).",
+      "when": "defence",
+      "hint": "Stealthy — one extra cover save, or upgrade one to a critical (not with Vantage)."
     },
     {
       "id": "mobile",
@@ -1223,7 +1366,9 @@
       "remind_at": [
         "activation.start"
       ],
-      "prompt": "Mobile — Fall Back for 1 less AP, and you can Charge out of enemy control range."
+      "prompt": "Mobile — Fall Back for 1 less AP, and you can Charge out of enemy control range.",
+      "when": "activation",
+      "hint": "Mobile — Fall Back for 1 less AP, and you can Charge out of enemy control range."
     },
     {
       "id": "hardy",
@@ -1232,7 +1377,9 @@
       "remind_at": [
         "defence.shooting.before_roll"
       ],
-      "prompt": "Hardy — defence dice of 5+ are critical successes."
+      "prompt": "Hardy — defence dice of 5+ are critical successes.",
+      "when": "defence",
+      "hint": "Hardy — defence dice of 5+ are critical successes."
     },
     {
       "id": "sharpshooter",
@@ -1241,7 +1388,21 @@
       "remind_at": [
         "combat.shoot.before_roll"
       ],
-      "prompt": "Sharpshooter — bolt weapons gain Accurate 1 and Severe if you haven’t Charged, Fallen Back or Repositioned."
+      "prompt": "Sharpshooter — bolt weapons gain Accurate 1 and Severe if you haven’t Charged, Fallen Back or Repositioned.",
+      "when": "attack",
+      "hint": "Sharpshooter — bolt weapons gain Accurate 1 and Severe if you haven’t Charged, Fallen Back or Repositioned.",
+      "grantsWeaponRules": [
+        {
+          "match": [
+            "bolt"
+          ],
+          "rules": [
+            "Accurate 1",
+            "Severe"
+          ],
+          "condition": "if it hasn't Charged, Fallen Back or Repositioned this activation"
+        }
+      ]
     },
     {
       "id": "siege_specialist",
@@ -1252,7 +1413,19 @@
         "combat.fight.before_roll",
         "combat.retaliate.before_roll"
       ],
-      "prompt": "Siege Specialist — ranged weapons have Saturate; enemies cannot assist in your melee."
+      "prompt": "Siege Specialist — ranged weapons have Saturate; enemies cannot assist in your melee.",
+      "when": "attack",
+      "hint": "Siege Specialist — ranged weapons have Saturate; enemies cannot assist in your melee.",
+      "grantsWeaponRules": [
+        {
+          "match": [
+            "ranged"
+          ],
+          "rules": [
+            "Saturate"
+          ]
+        }
+      ]
     }
   ]
 }
