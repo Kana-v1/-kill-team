@@ -1,0 +1,1258 @@
+{
+  "meta": {
+    "team": "Angels of Death",
+    "teamId": "IMP-AOD",
+    "edition": "Kill Team (2024)",
+    "schema": 1,
+    "compiled": "2026-09-13",
+    "sources": [
+      "official: eng_26-08_killteam_angels_of_death_online_rules-1rwlnicmkz-qjtykwlybg.pdf"
+    ],
+    "note": "Checked page by page against the official August '26 PDF (linked from the Kill Team downloads page). Ploy costs: 1CP (core rules; cards print none).",
+    "photos": "Set operative.photo to a data: URI (small square, ~96px) to replace the generated glyph.",
+    "composition": "1 operative from Captain / Assault Intercessor Sergeant / Intercessor Sergeant, plus 5 others. Other than WARRIOR operatives, each operative can be taken only once.",
+    "chapterVeteran": "Chapter Veteran (both Sergeants only): that operative gains one ADDITIONAL chapter tactic for the battle. Unlike primary and secondary tactics, it need not be the same one each battle in a campaign or tournament.",
+    "unresolved": [],
+    "defaultRoster": [
+      "captain",
+      "intercessor_gunner",
+      "heavy_intercessor_gunner",
+      "eliminator_sniper",
+      "intercessor_warrior#1",
+      "assault_intercessor_warrior#1"
+    ],
+    "specifiedOperative": "\"The specified operative\" is the operative a ploy names in its own trigger — the one fighting, being shot, counteracting, or activating. Heroic Leader only discounts a firefight ploy when that operative is the Captain.",
+    "sourcePdf": "eng_26-08_killteam_angels_of_death_online_rules-1rwlnicmkz-qjtykwlybg.pdf",
+    "rulesVersion": "August '26"
+  },
+  "vocab": {
+    "windows": [
+      "strategy_phase",
+      "activation.own",
+      "combat.shoot",
+      "combat.fight",
+      "combat.retaliate",
+      "defence.shooting",
+      "counteract",
+      "any"
+    ],
+    "durations": [
+      "instant",
+      "this_sequence",
+      "this_activation",
+      "this_counteraction",
+      "end_of_turning_point",
+      "battle"
+    ],
+    "triggers": [
+      "turning_point.start",
+      "strategy_phase",
+      "activation.start",
+      "combat.shoot.before_roll",
+      "combat.shoot.after_roll",
+      "combat.fight.before_roll",
+      "combat.fight.after_roll",
+      "combat.retaliate.before_roll",
+      "combat.retaliate.after_roll",
+      "defence.shooting.before_roll",
+      "defence.shooting.after_roll",
+      "counteract.available",
+      "turning_point.end"
+    ],
+    "contexts": [
+      {
+        "id": "strategy_phase",
+        "label": "Strategy"
+      },
+      {
+        "id": "activation.own",
+        "label": "Activating"
+      },
+      {
+        "id": "combat.shoot",
+        "label": "Shooting"
+      },
+      {
+        "id": "combat.fight",
+        "label": "Fighting"
+      },
+      {
+        "id": "combat.retaliate",
+        "label": "Retaliating"
+      },
+      {
+        "id": "defence.shooting",
+        "label": "Defending"
+      },
+      {
+        "id": "counteract",
+        "label": "Counteracting"
+      }
+    ]
+  },
+  "effects": [
+    {
+      "id": "core.ff.command_reroll",
+      "name": "Command Re-roll",
+      "kind": "firefight_ploy",
+      "universal": true,
+      "cost": {
+        "cp": 1
+      },
+      "windows": [
+        "combat.shoot",
+        "combat.fight",
+        "combat.retaliate",
+        "defence.shooting"
+      ],
+      "duration": "instant",
+      "text": "After rolling your attack or defence dice, re-roll one of those dice. No limit per turning point.",
+      "remind_at": [],
+      "source": "core rules"
+    },
+    {
+      "id": "aod.rule.astartes",
+      "name": "Astartes",
+      "kind": "faction_rule",
+      "cost": {
+        "cp": 0
+      },
+      "alwaysOn": true,
+      "duration": "battle",
+      "text": "During each friendly operative's activation, it can perform either two Shoot actions or two Fight actions. If two Shoot, a bolt weapon must be selected for at least one; if it's a bolt sniper rifle or heavy bolter, 1 additional AP must be spent for the second action if both use that weapon. Each friendly operative can counteract regardless of its order.",
+      "remind_at": [
+        "activation.start",
+        "counteract.available"
+      ],
+      "prompts": {
+        "activation.start": "Take TWO Shoot or TWO Fight actions (one Shoot with a bolt weapon; a second shot with the same bolt sniper rifle or heavy bolter costs +1 AP).",
+        "counteract.available": "Can counteract regardless of this operative's order."
+      },
+      "source": "official PDF, August '26"
+    },
+    {
+      "id": "aod.strat.combat_doctrine",
+      "name": "Combat Doctrine",
+      "kind": "strategy_ploy",
+      "cost": {
+        "cp": 1
+      },
+      "window": "strategy_phase",
+      "once_per": "turning_point",
+      "duration": "end_of_turning_point",
+      "text": "Select a doctrine. Friendly operatives' weapons gain Balanced (re-roll one attack die) when the doctrine's condition is met.",
+      "options": [
+        {
+          "id": "devastator",
+          "name": "Devastator",
+          "condition": "target is more than 6\" away",
+          "remind_at": [
+            "combat.shoot.before_roll"
+          ],
+          "prompt": "Balanced (re-roll one attack die) if the target is more than 6\" away."
+        },
+        {
+          "id": "tactical",
+          "name": "Tactical",
+          "condition": "target is within 6\"",
+          "remind_at": [
+            "combat.shoot.before_roll"
+          ],
+          "prompt": "Balanced (re-roll one attack die) if the target is within 6\"."
+        },
+        {
+          "id": "assault",
+          "name": "Assault",
+          "condition": "fighting or retaliating",
+          "remind_at": [
+            "combat.fight.before_roll",
+            "combat.retaliate.before_roll"
+          ],
+          "prompt": "Balanced (re-roll one attack die) when fighting or retaliating."
+        }
+      ],
+      "source": "official PDF, August '26"
+    },
+    {
+      "id": "aod.strat.and_they_shall_know_no_fear",
+      "name": "And They Shall Know No Fear",
+      "kind": "strategy_ploy",
+      "cost": {
+        "cp": 1
+      },
+      "window": "strategy_phase",
+      "once_per": "turning_point",
+      "duration": "end_of_turning_point",
+      "text": "Ignore any changes to friendly operatives' stats from being injured, including their weapons' stats.",
+      "remind_at": [
+        "activation.start",
+        "combat.shoot.before_roll",
+        "combat.fight.before_roll",
+        "combat.retaliate.before_roll"
+      ],
+      "prompts": {
+        "*": "Injured operatives use their NORMAL stats this turning point (weapons included)."
+      },
+      "source": "official PDF, August '26"
+    },
+    {
+      "id": "aod.strat.indomitus",
+      "name": "Indomitus",
+      "kind": "strategy_ploy",
+      "cost": {
+        "cp": 1
+      },
+      "window": "strategy_phase",
+      "once_per": "turning_point",
+      "duration": "end_of_turning_point",
+      "text": "When an enemy shoots a friendly operative, if you roll two or more fails you can discard one to retain another as a normal success.",
+      "remind_at": [
+        "defence.shooting.after_roll"
+      ],
+      "prompts": {
+        "*": "Two or more fails? Discard one to retain another as a normal success."
+      },
+      "source": "official PDF, August '26"
+    },
+    {
+      "id": "aod.strat.adaptive_tactics",
+      "name": "Adaptive Tactics",
+      "kind": "strategy_ploy",
+      "cost": {
+        "cp": 1
+      },
+      "window": "strategy_phase",
+      "once_per": "turning_point",
+      "duration": "end_of_turning_point",
+      "text": "Change your secondary Chapter Tactic. It reverts at the end of the turning point.",
+      "remind_at": [
+        "turning_point.end"
+      ],
+      "prompts": {
+        "turning_point.end": "Your original secondary Chapter Tactic returns now."
+      },
+      "source": "official PDF, August '26"
+    },
+    {
+      "id": "aod.ff.shock_assault",
+      "name": "Shock Assault",
+      "kind": "firefight_ploy",
+      "cost": {
+        "cp": 1
+      },
+      "window": "combat.fight",
+      "requires": {
+        "note": "the operative charged this activation"
+      },
+      "duration": "this_sequence",
+      "text": "Use when a friendly operative is performing the Fight action during an activation in which it performed the Charge action, at the start of the Resolve Attack Dice step. Until the end of that action its melee weapon has Shock, and the first time you strike during that sequence, inflict 1 additional damage (max 7).",
+      "remind_at": [
+        "combat.fight.before_roll"
+      ],
+      "prompts": {
+        "*": "Shock, +1 damage on the first strike (max 7)."
+      },
+      "source": "official PDF, August '26",
+      "once_per": "turning_point"
+    },
+    {
+      "id": "aod.ff.transhuman_physiology",
+      "name": "Transhuman Physiology",
+      "kind": "firefight_ploy",
+      "cost": {
+        "cp": 1
+      },
+      "window": "defence.shooting",
+      "duration": "this_sequence",
+      "text": "In the Roll Defence Dice step when being shot, retain one normal success as a critical success.",
+      "remind_at": [
+        "defence.shooting.after_roll"
+      ],
+      "prompts": {
+        "*": "Retain one normal success as a CRITICAL success."
+      },
+      "source": "official PDF, August '26",
+      "once_per": "turning_point"
+    },
+    {
+      "id": "aod.ff.wrath_of_vengeance",
+      "name": "Wrath of Vengeance",
+      "kind": "firefight_ploy",
+      "cost": {
+        "cp": 1
+      },
+      "window": "counteract",
+      "duration": "this_counteraction",
+      "text": "Use when a friendly operative is counteracting. It can perform an additional 1AP action for free during that counteraction, but both actions must be different.",
+      "remind_at": [
+        "counteract.available"
+      ],
+      "prompts": {
+        "*": "One extra free 1AP action (different from the first)."
+      },
+      "source": "official PDF, August '26",
+      "once_per": "turning_point"
+    },
+    {
+      "id": "aod.ff.adjust_doctrine",
+      "name": "Adjust Doctrine",
+      "kind": "firefight_ploy",
+      "cost": {
+        "cp": 1
+      },
+      "window": "activation.own",
+      "duration": "instant",
+      "requires": {
+        "activeEffect": "aod.strat.combat_doctrine"
+      },
+      "changesOptionOf": "aod.strat.combat_doctrine",
+      "text": "During a friendly operative's activation, before or after an action, change the Combat Doctrine you selected this turning point.",
+      "remind_at": [],
+      "source": "official PDF, August '26",
+      "once_per": "turning_point"
+    },
+    {
+      "id": "aod.eq.purity_seals",
+      "name": "Purity Seals",
+      "kind": "equipment",
+      "cost": {
+        "cp": 0
+      },
+      "window": "any",
+      "once_per": "turning_point",
+      "duration": "this_sequence",
+      "text": "Once per turning point, when a friendly operative is shooting, fighting or retaliating, if you roll two or more fails you can discard one to retain another as a normal success.",
+      "remind_at": [
+        "combat.shoot.after_roll",
+        "combat.fight.after_roll",
+        "combat.retaliate.after_roll"
+      ],
+      "prompts": {
+        "*": "Two or more fails? Discard one to retain another as a normal success."
+      },
+      "source": "official PDF, August '26"
+    },
+    {
+      "id": "aod.eq.auspex",
+      "name": "Auspex",
+      "kind": "equipment",
+      "cost": {
+        "cp": 0
+      },
+      "window": "combat.shoot",
+      "once_per": "turning_point",
+      "duration": "this_activation",
+      "text": "Once per turning point, when a friendly operative performs a Shoot action and you are selecting a valid target: until the end of that activation or counteraction, enemy operatives within 8\" of it cannot be obscured.",
+      "remind_at": [
+        "combat.shoot.before_roll"
+      ],
+      "prompts": {
+        "*": "Enemies within 8\" can't be obscured until the end of this activation."
+      },
+      "source": "official PDF, August '26"
+    },
+    {
+      "id": "aod.eq.tilting_shields",
+      "name": "Tilting Shields",
+      "kind": "equipment",
+      "cost": {
+        "cp": 0
+      },
+      "window": "any",
+      "once_per": "turning_point",
+      "duration": "this_sequence",
+      "text": "Once per turning point, when a friendly operative is fighting or retaliating, after your opponent rolls attack dice but before re-rolls, they cannot retain results of less than 6 as critical successes for that sequence.",
+      "remind_at": [
+        "combat.fight.after_roll",
+        "combat.retaliate.after_roll"
+      ],
+      "prompts": {
+        "*": "Opponent can't retain results below 6 as criticals this sequence (before re-rolls)."
+      },
+      "source": "official PDF, August '26"
+    },
+    {
+      "id": "aod.eq.chapter_reliquaries",
+      "name": "Chapter Reliquaries",
+      "kind": "equipment",
+      "cost": {
+        "cp": 0
+      },
+      "duration": "battle",
+      "costOverride": {
+        "effect": "aod.ff.wrath_of_vengeance",
+        "cp": 0,
+        "condition": "the operative has an Engage order"
+      },
+      "text": "You can use the Wrath of Vengeance firefight ploy for 0CP if the specified friendly operative has an Engage order.",
+      "remind_at": [
+        "counteract.available"
+      ],
+      "prompts": {
+        "*": "Wrath of Vengeance is FREE if this operative has an Engage order."
+      },
+      "source": "official PDF, August '26",
+      "alwaysOn": true
+    },
+    {
+      "id": "aod.op.heroic_leader",
+      "name": "Heroic Leader",
+      "kind": "operative_ability",
+      "requiresOperative": "captain",
+      "cost": {
+        "cp": 0
+      },
+      "alwaysOn": true,
+      "duration": "battle",
+      "text": "Once per turning point, ONE of: use a firefight ploy for 0CP if the Captain is the specified operative (not Command Re-roll); use Combat Doctrine when you activate an operative, paying its CP cost as normal, if the Captain is in the killzone and not within enemy control range — not if you already used that ploy this turning point; or use Adjust Doctrine for 0CP under those same conditions.",
+      "costOverrides": [
+        {
+          "kind": "firefight_ploy",
+          "cp": 0,
+          "once_per": "turning_point",
+          "group": "heroic_leader",
+          "selectedIs": "captain",
+          "excludes": [
+            "core.ff.command_reroll"
+          ],
+          "condition": "the Captain is the operative this ploy specifies · one Heroic Leader use per turning point"
+        },
+        {
+          "effect": "aod.ff.adjust_doctrine",
+          "cp": 0,
+          "once_per": "turning_point",
+          "group": "heroic_leader",
+          "condition": "Captain in the killzone and not within an enemy control range · one Heroic Leader use per turning point"
+        }
+      ],
+      "remind_at": [
+        "activation.start"
+      ],
+      "prompts": {
+        "*": "Use Combat Doctrine now, on activation, at its normal cost (Captain in the killzone, out of enemy control range; not if you already used it this turning point)."
+      },
+      "source": "official PDF, August '26"
+    },
+    {
+      "id": "aod.op.iron_halo",
+      "name": "Iron Halo",
+      "kind": "operative_ability",
+      "requiresOperative": "captain",
+      "cost": {
+        "cp": 0
+      },
+      "alwaysOn": true,
+      "once_per": "battle",
+      "duration": "battle",
+      "text": "Once per battle, when an attack dice inflicts Normal Damage on the Captain, ignore that damage.",
+      "remind_at": [
+        "defence.shooting.after_roll",
+        "combat.retaliate.after_roll"
+      ],
+      "prompts": {
+        "*": "Once per battle: ignore one attack dice's Normal Damage on the Captain."
+      },
+      "source": "official PDF, August '26"
+    },
+    {
+      "id": "aod.op.optics",
+      "name": "Optics",
+      "kind": "operative_ability",
+      "requiresOperative": "eliminator_sniper",
+      "cost": {
+        "cp": 0
+      },
+      "alwaysOn": true,
+      "duration": "battle",
+      "text": "Action (1AP): until the start of this operative's next activation, whenever it's shooting, enemy operatives cannot be obscured. Cannot be performed while within control range of an enemy operative.",
+      "remind_at": [
+        "activation.start"
+      ],
+      "prompts": {
+        "*": "1AP: until its next activation, when this operative shoots, enemies can't be obscured. Not in enemy control range."
+      },
+      "source": "official PDF, August '26"
+    },
+    {
+      "id": "aod.op.doctrine_warfare_asltsgt",
+      "name": "Doctrine Warfare",
+      "kind": "operative_ability",
+      "requiresOperative": "assault_intercessor_sergeant",
+      "cost": {
+        "cp": 0
+      },
+      "alwaysOn": true,
+      "duration": "battle",
+      "text": "Once per battle each: Combat Doctrine costs 0CP when you select Assault, and 0CP when you select Tactical, if this operative is in the killzone.",
+      "costOverrides": [
+        {
+          "effect": "aod.strat.combat_doctrine",
+          "options": [
+            "assault"
+          ],
+          "cp": 0,
+          "once_per": "battle",
+          "condition": "Assault Intercessor Sergeant is in the killzone · once per battle"
+        },
+        {
+          "effect": "aod.strat.combat_doctrine",
+          "options": [
+            "tactical"
+          ],
+          "cp": 0,
+          "once_per": "battle",
+          "condition": "Assault Intercessor Sergeant is in the killzone · once per battle"
+        }
+      ],
+      "remind_at": [
+        "strategy_phase"
+      ],
+      "prompts": {
+        "*": "Assault or tactical doctrine is free while the Assault Intercessor Sergeant is in the killzone (once per battle each)."
+      },
+      "source": "official PDF, August '26"
+    },
+    {
+      "id": "aod.op.doctrine_warfare_intsgt",
+      "name": "Doctrine Warfare",
+      "kind": "operative_ability",
+      "requiresOperative": "intercessor_sergeant",
+      "cost": {
+        "cp": 0
+      },
+      "alwaysOn": true,
+      "duration": "battle",
+      "text": "Once per battle each: Combat Doctrine costs 0CP when you select Devastator, and 0CP when you select Tactical, if this operative is in the killzone.",
+      "costOverrides": [
+        {
+          "effect": "aod.strat.combat_doctrine",
+          "options": [
+            "devastator"
+          ],
+          "cp": 0,
+          "once_per": "battle",
+          "condition": "Intercessor Sergeant is in the killzone · once per battle"
+        },
+        {
+          "effect": "aod.strat.combat_doctrine",
+          "options": [
+            "tactical"
+          ],
+          "cp": 0,
+          "once_per": "battle",
+          "condition": "Intercessor Sergeant is in the killzone · once per battle"
+        }
+      ],
+      "remind_at": [
+        "strategy_phase"
+      ],
+      "prompts": {
+        "*": "Devastator or tactical doctrine is free while the Intercessor Sergeant is in the killzone (once per battle each)."
+      },
+      "source": "official PDF, August '26"
+    },
+    {
+      "id": "aod.op.camo_cloak",
+      "name": "Camo Cloak",
+      "kind": "operative_ability",
+      "requiresOperative": "eliminator_sniper",
+      "cost": {
+        "cp": 0
+      },
+      "alwaysOn": true,
+      "duration": "battle",
+      "text": "Whenever an operative is shooting this operative, ignore the Saturate weapon rule. This operative has the Stealthy chapter tactic; if you selected that chapter tactic, you can do both of its options (retain two cover saves — one normal and one critical success).",
+      "remind_at": [
+        "defence.shooting.before_roll"
+      ],
+      "prompts": {
+        "*": "When this operative is shot, ignore Saturate. It has Stealthy — and can use both Stealthy options if you picked it."
+      },
+      "source": "official PDF, August '26"
+    },
+    {
+      "id": "aod.op.grenadier",
+      "name": "Grenadier",
+      "kind": "operative_ability",
+      "requiresOperative": "assault_intercessor_grenadier",
+      "cost": {
+        "cp": 0
+      },
+      "alwaysOn": true,
+      "duration": "battle",
+      "text": "This operative can use frag and krak grenades (see universal equipment). Doing so doesn't count towards any limited uses you have. Whenever it's doing so, improve the Hit stat of that weapon by 1.",
+      "remind_at": [
+        "combat.shoot.before_roll"
+      ],
+      "prompts": {
+        "*": "Grenadier uses frag and krak grenades free of their limited uses, at +1 Hit."
+      },
+      "source": "official PDF, August '26"
+    }
+  ],
+  "operatives": [
+    {
+      "id": "captain",
+      "name": "Space Marine Captain",
+      "role": "Leader",
+      "stats": {
+        "apl": 3,
+        "move": "6\"",
+        "save": "3+",
+        "wounds": 15
+      },
+      "abilities": [
+        "Astartes",
+        "Heroic Leader",
+        "Iron Halo"
+      ],
+      "weapons": [
+        {
+          "name": "Plasma pistol (standard)",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "3/5",
+          "rules": "Range 8\", Piercing 1"
+        },
+        {
+          "name": "Plasma pistol (supercharge)",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "4/5",
+          "rules": "Range 8\", Hot, Lethal 5+, Piercing 1"
+        },
+        {
+          "name": "Power fist",
+          "type": "melee",
+          "atk": 5,
+          "hit": "3+",
+          "dmg": "5/7",
+          "rules": "Brutal"
+        }
+      ],
+      "icon": "laurel",
+      "accent": "#D9B45B",
+      "photo": null,
+      "leader": true,
+      "multiple": false,
+      "chapterVeteran": false
+    },
+    {
+      "id": "intercessor_sergeant",
+      "name": "Intercessor Sergeant",
+      "role": "Leader",
+      "stats": {
+        "apl": 3,
+        "move": "6\"",
+        "save": "3+",
+        "wounds": 15
+      },
+      "abilities": [
+        "Astartes",
+        "Chapter Veteran",
+        "Doctrine Warfare"
+      ],
+      "weapons": [
+        {
+          "name": "Bolt rifle",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "3/4",
+          "rules": "Piercing Crits 1"
+        },
+        {
+          "name": "Auto bolt rifle",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "3/4",
+          "rules": "Torrent 1\""
+        },
+        {
+          "name": "Stalker bolt rifle (heavy)",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "3/5",
+          "rules": "Heavy (Dash only), Lethal 5+, Piercing Crits 1"
+        },
+        {
+          "name": "Stalker bolt rifle (mobile)",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "3/4",
+          "rules": "—"
+        },
+        {
+          "name": "Fists",
+          "type": "melee",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "3/4",
+          "rules": "—"
+        },
+        {
+          "name": "Chainsword",
+          "type": "melee",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "4/5",
+          "rules": "—"
+        },
+        {
+          "name": "Power weapon",
+          "type": "melee",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "4/6",
+          "rules": "Lethal 5+"
+        },
+        {
+          "name": "Power fist",
+          "type": "melee",
+          "atk": 4,
+          "hit": "4+",
+          "dmg": "5/7",
+          "rules": "Brutal"
+        },
+        {
+          "name": "Thunder hammer",
+          "type": "melee",
+          "atk": 4,
+          "hit": "4+",
+          "dmg": "5/6",
+          "rules": "Shock, Stun"
+        }
+      ],
+      "icon": "chevron2",
+      "accent": "#7FB2D9",
+      "photo": null,
+      "leader": true,
+      "multiple": false,
+      "chapterVeteran": true
+    },
+    {
+      "id": "assault_intercessor_sergeant",
+      "name": "Assault Intercessor Sergeant",
+      "role": "Leader",
+      "stats": {
+        "apl": 3,
+        "move": "6\"",
+        "save": "3+",
+        "wounds": 15
+      },
+      "abilities": [
+        "Astartes",
+        "Chapter Veteran",
+        "Doctrine Warfare"
+      ],
+      "weapons": [
+        {
+          "name": "Heavy bolt pistol",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "3/4",
+          "rules": "Range 8\", Piercing Crits 1"
+        },
+        {
+          "name": "Hand flamer",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "2+",
+          "dmg": "3/3",
+          "rules": "Range 6\", Saturate, Torrent 1\""
+        },
+        {
+          "name": "Plasma pistol (standard)",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "3/5",
+          "rules": "Range 8\", Piercing 1"
+        },
+        {
+          "name": "Plasma pistol (supercharge)",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "4/5",
+          "rules": "Range 8\", Hot, Lethal 5+, Piercing 1"
+        },
+        {
+          "name": "Chainsword",
+          "type": "melee",
+          "atk": 5,
+          "hit": "3+",
+          "dmg": "4/5",
+          "rules": "—"
+        },
+        {
+          "name": "Power weapon",
+          "type": "melee",
+          "atk": 5,
+          "hit": "3+",
+          "dmg": "4/6",
+          "rules": "Lethal 5+"
+        },
+        {
+          "name": "Power fist",
+          "type": "melee",
+          "atk": 5,
+          "hit": "4+",
+          "dmg": "5/7",
+          "rules": "Brutal"
+        },
+        {
+          "name": "Thunder hammer",
+          "type": "melee",
+          "atk": 5,
+          "hit": "4+",
+          "dmg": "5/6",
+          "rules": "Shock, Stun"
+        }
+      ],
+      "icon": "chevron2",
+      "accent": "#E08B6A",
+      "photo": null,
+      "leader": true,
+      "multiple": false,
+      "chapterVeteran": true
+    },
+    {
+      "id": "intercessor_warrior",
+      "name": "Intercessor Warrior",
+      "stats": {
+        "apl": 3,
+        "move": "6\"",
+        "save": "3+",
+        "wounds": 14
+      },
+      "abilities": [
+        "Astartes"
+      ],
+      "weapons": [
+        {
+          "name": "Bolt rifle",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "3/4",
+          "rules": "Piercing Crits 1"
+        },
+        {
+          "name": "Auto bolt rifle",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "3/4",
+          "rules": "Torrent 1\""
+        },
+        {
+          "name": "Stalker bolt rifle (heavy)",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "3/5",
+          "rules": "Heavy (Dash only), Lethal 5+, Piercing Crits 1"
+        },
+        {
+          "name": "Stalker bolt rifle (mobile)",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "3/4",
+          "rules": "—"
+        },
+        {
+          "name": "Fists",
+          "type": "melee",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "3/4",
+          "rules": "—"
+        }
+      ],
+      "icon": "rifle",
+      "accent": "#8FA5B5",
+      "photo": null,
+      "leader": false,
+      "multiple": true,
+      "role": "Warrior",
+      "chapterVeteran": false
+    },
+    {
+      "id": "intercessor_gunner",
+      "name": "Intercessor Gunner",
+      "stats": {
+        "apl": 3,
+        "move": "6\"",
+        "save": "3+",
+        "wounds": 14
+      },
+      "abilities": [
+        "Astartes"
+      ],
+      "weapons": [
+        {
+          "name": "Bolt rifle",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "3/4",
+          "rules": "Piercing Crits 1"
+        },
+        {
+          "name": "Auto bolt rifle",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "3/4",
+          "rules": "Torrent 1\""
+        },
+        {
+          "name": "Stalker bolt rifle (heavy)",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "3/5",
+          "rules": "Heavy (Dash only), Lethal 5+, Piercing Crits 1"
+        },
+        {
+          "name": "Stalker bolt rifle (mobile)",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "3/4",
+          "rules": "—"
+        },
+        {
+          "name": "Auxiliary grenade launcher (frag)",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "2/4",
+          "rules": "Blast 2\""
+        },
+        {
+          "name": "Auxiliary grenade launcher (krak)",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "4/5",
+          "rules": "Piercing 1"
+        },
+        {
+          "name": "Fists",
+          "type": "melee",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "3/4",
+          "rules": "—"
+        }
+      ],
+      "icon": "launcher",
+      "accent": "#9C8FD9",
+      "photo": null,
+      "leader": false,
+      "multiple": false,
+      "role": "Specialist",
+      "chapterVeteran": false
+    },
+    {
+      "id": "assault_intercessor_warrior",
+      "name": "Assault Intercessor Warrior",
+      "stats": {
+        "apl": 3,
+        "move": "6\"",
+        "save": "3+",
+        "wounds": 14
+      },
+      "abilities": [
+        "Astartes"
+      ],
+      "weapons": [
+        {
+          "name": "Heavy bolt pistol",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "3/4",
+          "rules": "Range 8\", Piercing Crits 1"
+        },
+        {
+          "name": "Chainsword",
+          "type": "melee",
+          "atk": 5,
+          "hit": "3+",
+          "dmg": "4/5",
+          "rules": "—"
+        }
+      ],
+      "icon": "chainsword",
+      "accent": "#E2685F",
+      "photo": null,
+      "leader": false,
+      "multiple": true,
+      "role": "Warrior",
+      "chapterVeteran": false
+    },
+    {
+      "id": "assault_intercessor_grenadier",
+      "name": "Assault Intercessor Grenadier",
+      "stats": {
+        "apl": 3,
+        "move": "6\"",
+        "save": "3+",
+        "wounds": 14
+      },
+      "abilities": [
+        "Astartes",
+        "Grenadier"
+      ],
+      "weapons": [
+        {
+          "name": "Heavy bolt pistol",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "3/4",
+          "rules": "Range 8\", Piercing Crits 1"
+        },
+        {
+          "name": "Chainsword",
+          "type": "melee",
+          "atk": 5,
+          "hit": "3+",
+          "dmg": "4/5",
+          "rules": "—"
+        }
+      ],
+      "icon": "grenade",
+      "accent": "#C99A4E",
+      "photo": null,
+      "leader": false,
+      "multiple": false,
+      "role": "Specialist",
+      "chapterVeteran": false
+    },
+    {
+      "id": "heavy_intercessor_gunner",
+      "name": "Heavy Intercessor Gunner",
+      "stats": {
+        "apl": 3,
+        "move": "5\"",
+        "save": "3+",
+        "wounds": 18
+      },
+      "abilities": [
+        "Astartes"
+      ],
+      "weapons": [
+        {
+          "name": "Heavy bolter (focused)",
+          "type": "ranged",
+          "atk": 5,
+          "hit": "3+",
+          "dmg": "4/5",
+          "rules": "Piercing Crits 1"
+        },
+        {
+          "name": "Heavy bolter (sweeping)",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "4/5",
+          "rules": "Piercing Crits 1, Torrent 1\""
+        },
+        {
+          "name": "Bolt pistol",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "3/4",
+          "rules": "Range 8\""
+        },
+        {
+          "name": "Fists",
+          "type": "melee",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "3/4",
+          "rules": "—"
+        }
+      ],
+      "icon": "heavy",
+      "accent": "#6FA88C",
+      "photo": null,
+      "leader": false,
+      "multiple": false,
+      "role": "Specialist",
+      "chapterVeteran": false
+    },
+    {
+      "id": "eliminator_sniper",
+      "name": "Eliminator Sniper",
+      "stats": {
+        "apl": 3,
+        "move": "7\"",
+        "save": "3+",
+        "wounds": 12
+      },
+      "abilities": [
+        "Astartes",
+        "Camo Cloak",
+        "Optics (1AP)"
+      ],
+      "weapons": [
+        {
+          "name": "Bolt sniper rifle (executioner)",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "2+",
+          "dmg": "3/4",
+          "rules": "Heavy (Dash only), Saturate, Seek Light, Silent"
+        },
+        {
+          "name": "Bolt sniper rifle (hyperfrag)",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "2+",
+          "dmg": "2/4",
+          "rules": "Blast 1\", Heavy (Dash only), Silent"
+        },
+        {
+          "name": "Bolt sniper rifle (mortis)",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "2+",
+          "dmg": "3/3",
+          "rules": "Devastating 3, Heavy (Dash only), Piercing 1, Silent"
+        },
+        {
+          "name": "Bolt pistol",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "3/4",
+          "rules": "Range 8\""
+        },
+        {
+          "name": "Fists",
+          "type": "melee",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "3/4",
+          "rules": "—"
+        }
+      ],
+      "icon": "crosshair",
+      "accent": "#5FC08C",
+      "photo": null,
+      "leader": false,
+      "multiple": false,
+      "role": "Specialist",
+      "chapterVeteran": false
+    }
+  ],
+  "universalEquipment": [
+    {
+      "name": "Frag grenade",
+      "type": "ranged",
+      "atk": 4,
+      "hit": "4+",
+      "dmg": "2/4",
+      "rules": "Range 6\", Blast 2\", Saturate, Limited 1"
+    },
+    {
+      "name": "Krak grenade",
+      "type": "ranged",
+      "atk": 4,
+      "hit": "4+",
+      "dmg": "4/5",
+      "rules": "Range 6\", Piercing 1, Saturate, Limited 1"
+    }
+  ],
+  "chapterTactics": [
+    {
+      "id": "aggressive",
+      "name": "Aggressive",
+      "text": "This operative’s melee weapons have the Rending weapon rule.",
+      "remind_at": [
+        "combat.fight.before_roll",
+        "combat.retaliate.before_roll"
+      ],
+      "prompt": "Aggressive — melee weapons have Rending."
+    },
+    {
+      "id": "dueller",
+      "name": "Dueller",
+      "text": "Whenever fighting or retaliating, each of your normal successes can block one unresolved critical success (unless the enemy weapon has Brutal).",
+      "remind_at": [
+        "combat.fight.after_roll",
+        "combat.retaliate.after_roll"
+      ],
+      "prompt": "Dueller — your normal successes can block unresolved criticals (unless the enemy weapon has Brutal)."
+    },
+    {
+      "id": "resolute",
+      "name": "Resolute",
+      "text": "Ignore any changes to this operative’s APL stat; it is not affected by enemy Shock.",
+      "remind_at": [
+        "activation.start"
+      ],
+      "prompt": "Resolute — ignore APL changes, and ignore enemy Shock."
+    },
+    {
+      "id": "stealthy",
+      "name": "Stealthy",
+      "text": "When enemies shoot this operative, if cover saves can be retained you may retain one additional cover save, or convert one to a critical success. Not cumulative with Vantage.",
+      "remind_at": [
+        "defence.shooting.before_roll"
+      ],
+      "prompt": "Stealthy — one extra cover save, or upgrade one to a critical (not with Vantage)."
+    },
+    {
+      "id": "mobile",
+      "name": "Mobile",
+      "text": "Fall Back costs 1 less AP, and this operative can Charge while within enemy control range, breaking that range to do so.",
+      "remind_at": [
+        "activation.start"
+      ],
+      "prompt": "Mobile — Fall Back for 1 less AP, and you can Charge out of enemy control range."
+    },
+    {
+      "id": "hardy",
+      "name": "Hardy",
+      "text": "Whenever an operative is shooting this operative, defence dice results of 5+ are critical successes.",
+      "remind_at": [
+        "defence.shooting.before_roll"
+      ],
+      "prompt": "Hardy — defence dice of 5+ are critical successes."
+    },
+    {
+      "id": "sharpshooter",
+      "name": "Sharpshooter",
+      "text": "If this operative has not performed a Charge, Fall Back or Reposition action, its bolt weapons gain Accurate 1 and Severe.",
+      "remind_at": [
+        "combat.shoot.before_roll"
+      ],
+      "prompt": "Sharpshooter — bolt weapons gain Accurate 1 and Severe if you haven’t Charged, Fallen Back or Repositioned."
+    },
+    {
+      "id": "siege_specialist",
+      "name": "Siege Specialist",
+      "text": "Ranged weapons gain Saturate, and enemies cannot assist during this operative’s melee.",
+      "remind_at": [
+        "combat.shoot.before_roll",
+        "combat.fight.before_roll",
+        "combat.retaliate.before_roll"
+      ],
+      "prompt": "Siege Specialist — ranged weapons have Saturate; enemies cannot assist in your melee."
+    }
+  ]
+}
