@@ -82,7 +82,7 @@ public struct Summary: Equatable {
     public var paid: [Paid]
 }
 
-public struct State {
+public struct GameState {
     public var tp = 1
     // Core rules: 2CP at the start, +1 in the first Strategy phase.
     public var cp = 3
@@ -140,22 +140,22 @@ public final class Engine {
 
     // MARK: fold
 
-    public func blank() -> State {
-        var s = State()
+    public func blank() -> GameState {
+        var s = GameState()
         s.roster = defaultRoster
         s.op = defaultRoster.first ?? ""
         s.tactics = ["primary": "", "secondary": "", "extra": ""]
         return s
     }
 
-    public func fold(_ events: [Event]) -> State {
+    public func fold(_ events: [Event]) -> GameState {
         var s = blank()
         for e in events { apply(&s, e) }
         return s
     }
 
     /// The only place State changes.
-    func apply(_ s: inout State, _ ev: Event) {
+    func apply(_ s: inout GameState, _ ev: Event) {
         let p = ev.p
         switch ev.t {
         case .phase:
@@ -260,7 +260,7 @@ public final class Engine {
         }
     }
 
-    func clearTurningPoint(_ s: inout State) {
+    func clearTurningPoint(_ s: inout GameState) {
         s.active = []
         s.used = [:]
         s.usedTp = [:]
@@ -268,7 +268,7 @@ public final class Engine {
         s.phase = .strategy
     }
 
-    func ensureOp(_ s: inout State) {
+    func ensureOp(_ s: inout GameState) {
         if !s.roster.contains(s.op) { s.op = s.roster.first ?? "" }
     }
 
@@ -276,7 +276,7 @@ public final class Engine {
 
     /// An effect exists only while its operative is on the table and up, and
     /// equipment only if it was taken.
-    func present(_ s: State, _ e: Effect) -> Bool {
+    func present(_ s: GameState, _ e: Effect) -> Bool {
         if e.kind == "equipment" && !s.equip.contains(e.id) { return false }
         guard let who = e.requiresOperative else { return true }
         return s.roster.contains { typeOf($0) == who && !s.dead.contains($0) }
@@ -304,7 +304,7 @@ public final class Engine {
     }
 
     /// Every cost override that could apply to `e` right now.
-    func routes(_ s: State, _ e: Effect, opt: String?) -> [Route] {
+    func routes(_ s: GameState, _ e: Effect, opt: String?) -> [Route] {
         var out: [Route] = []
         for p in rules.effects where present(s, p) {
             if p.kind == "equipment" && s.used[p.id] == s.tp { continue }
@@ -329,7 +329,7 @@ public final class Engine {
 
     /// The price to charge and why. Option-specific or wrong-operative routes
     /// don't move the headline; they come back as "can be free" hints.
-    func quote(_ s: State, _ e: Effect, opt: String?) -> Quote {
+    func quote(_ s: GameState, _ e: Effect, opt: String?) -> Quote {
         var best = Quote(cp: e.cost.cp)
         var maybe: [Route] = []
         for r in routes(s, e, opt: opt) {

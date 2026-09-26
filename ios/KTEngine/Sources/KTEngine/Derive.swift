@@ -3,7 +3,7 @@ import Foundation
 // derive(state) → View: everything the screen shows, computed from State and
 // the rules. Pure: it never changes State.
 
-public struct View {
+public struct Snapshot {
     public var team: String
     public var tp: Int
     public var cp: Int
@@ -16,9 +16,9 @@ public struct View {
     public var rosterStatus: RosterStatus
     public var veterans: [String]
     /// Usable now, grouped by when they matter.
-    public var use: [Group<UsableCard>]
+    public var use: [CardGroup<UsableCard>]
     /// In play for the selected operative, grouped by when they matter.
-    public var active: [Group<ActiveCard>]
+    public var active: [CardGroup<ActiveCard>]
     /// In play, but for other operatives (shown dimmed, names only).
     public var elsewhere: [Elsewhere]
     public var spent: [SpentCard]
@@ -27,7 +27,7 @@ public struct View {
     public var summary: Summary?
 }
 
-public struct Group<Card> {
+public struct CardGroup<Card> {
     public var when: When
     public var cards: [Card]
 }
@@ -109,7 +109,7 @@ let kindLabels = [
 ]
 
 extension Engine {
-    public func derive(_ s: State, logLength: Int = 0) -> View {
+    public func derive(_ s: GameState, logLength: Int = 0) -> Snapshot {
         let activeIds = Set(s.active.map(\.id))
         var usable: [UsableCard] = []
         var spent: [SpentCard] = []
@@ -156,7 +156,7 @@ extension Engine {
 
         usable = usable.filter(\.afford) + usable.filter { !$0.afford }
 
-        return View(
+        return Snapshot(
             team: teamId, tp: s.tp, cp: s.cp, phase: s.phase, roster: s.roster, op: s.op,
             dead: s.dead, equip: s.equip, tactics: s.tactics,
             rosterStatus: rosterStatus(s),
@@ -182,7 +182,7 @@ extension Engine {
         }
     }
 
-    func usableCard(_ s: State, _ e: Effect) -> UsableCard {
+    func usableCard(_ s: GameState, _ e: Effect) -> UsableCard {
         let q = quote(s, e, opt: nil)
         let discount = q.from.map { from in segments("\(from): \(q.condition ?? "")", excluding: e.name) }
         let options = (e.options ?? []).map { o in
@@ -253,7 +253,7 @@ extension Engine {
         }
     }
 
-    func appliesToSelected(_ item: InPlay, _ s: State, veterans: [String]) -> Bool {
+    func appliesToSelected(_ item: InPlay, _ s: GameState, veterans: [String]) -> Bool {
         switch item.appliesTo {
         case .team:
             return true
@@ -301,7 +301,7 @@ extension Engine {
 
     // MARK: weapon notes
 
-    func weaponNotes(_ s: State, _ mine: [InPlay]) -> [String: [WeaponNote]] {
+    func weaponNotes(_ s: GameState, _ mine: [InPlay]) -> [String: [WeaponNote]] {
         guard let op = operative(s.op) else { return [:] }
         var out: [String: [WeaponNote]] = [:]
         for item in mine {
@@ -327,18 +327,18 @@ extension Engine {
 
     // MARK: helpers
 
-    func grouped<Card>(_ cards: [Card], by when: (Card) -> When) -> [Group<Card>] {
+    func grouped<Card>(_ cards: [Card], by when: (Card) -> When) -> [CardGroup<Card>] {
         When.allCases.compactMap { w in
             let c = cards.filter { when($0) == w }
-            return c.isEmpty ? nil : Group(when: w, cards: c)
+            return c.isEmpty ? nil : CardGroup(when: w, cards: c)
         }
     }
 
-    func veteranInstances(_ s: State) -> [String] {
+    func veteranInstances(_ s: GameState) -> [String] {
         s.roster.filter { operative($0)?.chapterVeteran == true && !s.dead.contains($0) }
     }
 
-    func rosterStatus(_ s: State) -> RosterStatus {
+    func rosterStatus(_ s: GameState) -> RosterStatus {
         let leaderCount = s.roster.filter { leaders.contains(typeOf($0)) }.count
         return RosterStatus(total: s.roster.count, leaders: leaderCount, ok: s.roster.count == 6 && leaderCount == 1)
     }

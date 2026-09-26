@@ -24,7 +24,7 @@ enum Repo {
 
 func ev(_ t: Event.Kind, _ p: Params = Params()) -> Event { Event(t, p) }
 
-extension View {
+extension Snapshot {
     var usableIds: [String] { use.flatMap { $0.cards.map(\.id) } }
     var activeIds: [String] { active.flatMap { $0.cards.map(\.id) } }
     func activeGroup(of id: String) -> When? { active.first { $0.cards.contains { $0.id == id } }?.when }

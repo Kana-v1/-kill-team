@@ -25,3 +25,6 @@ DerivedData/
 .DS_Store
 *.swp
 __pycache__/
+/ios/build/
+/ios/Payload/
+/ios/build.log

@@ -1,0 +1,65 @@
+# Tests the rules engine, then builds an unsigned .ipa on a GitHub macOS runner.
+# Sideloadly re-signs it with a free Apple ID, so no certificates or secrets
+# live here.
+name: iOS build
+
+on:
+  push:
+    paths: ["ios/**", "data/teams/**", "data/core/**", ".github/workflows/ios.yml"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Toolchain
+        run: xcodebuild -version && swift --version
+
+      - name: Engine tests
+        working-directory: ios/KTEngine
+        run: swift test 2>&1 | tail -40
+
+      - name: Generate Xcode project
+        working-directory: ios
+        run: |
+          brew install xcodegen
+          xcodegen generate
+
+      - name: Build (unsigned)
+        working-directory: ios
+        run: |
+          xcodebuild -project KillTeam.xcodeproj -scheme KillTeam \
+            -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            build > build.log 2>&1 || {
+              echo "::group::errors"; grep -E "error:" build.log | sort -u | head -60; echo "::endgroup::"
+              tail -40 build.log
+              exit 1
+            }
+          echo "warnings: $(grep -c 'warning:' build.log || true)"
+
+      - name: Package .ipa
+        working-directory: ios
+        run: |
+          mkdir -p Payload
+          cp -R build/Build/Products/Release-iphoneos/KillTeam.app Payload/
+          zip -qry KillTeam.ipa Payload
+          ls -la KillTeam.ipa
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: KillTeam-ipa
+          path: ios/KillTeam.ipa
+          retention-days: 14
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build-log
+          path: ios/build.log
+          if-no-files-found: ignore
+          retention-days: 7
