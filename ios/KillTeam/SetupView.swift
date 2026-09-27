@@ -1,4 +1,5 @@
 import SwiftUI
+import PhotosUI
 import UniformTypeIdentifiers
 import KTEngine
 
@@ -11,6 +12,8 @@ struct SetupView: View {
     @State private var confirmReset = false
     @State private var importing = false
     @State private var importResult: String?
+    @State private var symbolItem: PhotosPickerItem?
+    @State private var pickingSymbolFile = false
 
     private var snap: Snapshot { store.snapshot }
     private var rules: RulesData { store.rules }
@@ -96,6 +99,7 @@ struct SetupView: View {
                 } header: { Text("Faction equipment") } footer: { Text("Tap a name to read what it does.") }
 
                 Section {
+                    teamSymbolRow
                     LabeledContent("Have photos", value: "\(photoCount) of \(rules.operatives.count)")
                     Button("Import photos…") { importing = true }
                     if let importResult { Text(importResult).font(.footnote).foregroundStyle(Theme.text2) }
@@ -142,12 +146,48 @@ struct SetupView: View {
                 let r = store.importPhotos(from: urls)
                 importResult = "Added \(r.matched)." + (r.unmatched.isEmpty ? "" : " Names didn't end with an operative or team id: " + r.unmatched.joined(separator: ", "))
             }
+            .fileImporter(isPresented: $pickingSymbolFile, allowedContentTypes: [.image]) { result in
+                guard case .success(let url) = result else { return }
+                let scoped = url.startAccessingSecurityScopedResource()
+                defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+                if let data = try? Data(contentsOf: url) { store.setTeamSymbol(data) }
+            }
+            .onChange(of: symbolItem) { _, item in
+                guard let item else { return }
+                Task {
+                    if let data = try? await item.loadTransferable(type: Data.self) { store.setTeamSymbol(data) }
+                    symbolItem = nil
+                }
+            }
             .ruleInfo(store.engine)
             .confirmationDialog("Reset the whole game?", isPresented: $confirmReset, titleVisibility: .visible) {
                 Button("Reset", role: .destructive) { store.resetGame() }
             }
         }
         .preferredColorScheme(.dark)
+    }
+
+    /// The current team's symbol: pick it directly, whatever the file is called.
+    private var teamSymbolRow: some View {
+        Menu {
+            PhotosPicker(selection: $symbolItem, matching: .images) {
+                Label("Choose from Photos", systemImage: "photo.on.rectangle")
+            }
+            Button { pickingSymbolFile = true } label: { Label("Choose from Files", systemImage: "folder") }
+            if store.teamSymbol(for: store.game.team) != nil {
+                Button(role: .destructive) { store.removeTeamSymbol() } label: { Label("Remove symbol", systemImage: "trash") }
+            }
+        } label: {
+            HStack {
+                Text("Team symbol").foregroundStyle(Theme.text)
+                Spacer()
+                if let symbol = store.teamSymbol(for: store.game.team) {
+                    Image(uiImage: symbol).resizable().scaledToFit().frame(width: 32, height: 32)
+                } else {
+                    Text("Choose…").foregroundStyle(Theme.link)
+                }
+            }
+        }
     }
 
     private func count(_ id: String) -> Int { snap.roster.filter { typeOf($0) == id }.count }

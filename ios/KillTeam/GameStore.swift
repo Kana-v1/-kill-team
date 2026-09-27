@@ -141,6 +141,11 @@ final class GameStore: ObservableObject {
     /// and transparent (fitted, not cropped).
     func teamSymbol(for team: String) -> UIImage? { photo(for: "team_\(team)") }
 
+    /// Sets the current team's symbol from any image, whatever its file name.
+    func setTeamSymbol(_ data: Data) { setPhoto(data, for: "team_\(game.team)", fit: true) }
+
+    func removeTeamSymbol() { removePhoto(for: "team_\(game.team)") }
+
     /// Imports image files whose names end with an operative id
     /// ("my_champion_plague_marine_champion.png", or just "plague_marine_champion.png",
     /// or the operative's name) or a team id for its symbol ("ci_celestian_insidiants.png").
