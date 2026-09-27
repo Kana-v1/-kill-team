@@ -25,8 +25,7 @@ are checked against the official August '26 PDFs.
 | `ios/project.yml` | XcodeGen spec; the Xcode project is generated on CI. |
 | `data/teams/*.json` | Per-team rules census, the source of truth, bundled into the app as-is. |
 | `data/core/glossary.json` | Core weapon-rule definitions, from the official Lite rules. |
-| `tools/rules-pipeline/` | Fetch the official PDFs, extract and audit (see its README). |
-| `legacy/` | The earlier single-file app and the Go/React web version. |
+| `tools/rules-pipeline/` | Fetch the official PDFs, extract and audit. |
 
 ## Build and test
 
@@ -56,13 +55,14 @@ python3 tools/rules-pipeline/audit.py <team>        # census vs PDF
 ```
 
 Then read the rendered pages, and edit the census only after the discrepancies
-have been reviewed. See [tools/rules-pipeline/README.md](tools/rules-pipeline/README.md).
+have been reviewed, then re-run `tools/add_ios_model_fields.py`. The rules for getting
+rules right are in [CLAUDE.md](CLAUDE.md#sourcing-rules-non-negotiable).
 
 ## Operative photos and team symbols
 
 Photos and team symbols are the player's own and stay on the phone: they are never committed or
 bundled. A file's name must end with `_<operative id>` (e.g. `my_champion_plague_marine_champion.png`)
 or, for a team's symbol, `_<team id>` (e.g. `symbol_celestian_insidiants.png`); Setup lists the ids.
-Add them in Setup → Photos and team symbol → **Import photos…**, by dropping files into
+Add them in Setup → Photos and team symbol → **Import photos…** (or the **Team symbol** row, any file name), by dropping files into
 *Files → On My iPhone → Kill Team*, or per operative by tapping its portrait (Photos, Files or the
 camera).

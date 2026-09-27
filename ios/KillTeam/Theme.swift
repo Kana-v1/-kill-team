@@ -170,8 +170,6 @@ struct Glyph: View {
     var body: some View {
         if let photo {
             Image(uiImage: photo).resizable().scaledToFill()
-        } else if let uri = operative.photo, let img = Glyph.image(fromDataURI: uri) {
-            Image(uiImage: img).resizable().scaledToFill()
         } else {
             Image(systemName: Glyph.symbol(operative.icon))
                 .font(.system(size: size, weight: .medium))
@@ -190,11 +188,5 @@ struct Glyph: View {
         case "crosshair": return "scope"
         default: return "shield"
         }
-    }
-
-    static func image(fromDataURI uri: String) -> UIImage? {
-        guard let comma = uri.firstIndex(of: ","),
-              let data = Data(base64Encoded: String(uri[uri.index(after: comma)...])) else { return nil }
-        return UIImage(data: data)
     }
 }

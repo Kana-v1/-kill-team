@@ -3,8 +3,6 @@
     "team": "Celestian Insidiants",
     "teamId": "IMP-CI",
     "edition": "Kill Team (2024)",
-    "schema": 1,
-    "compiled": "2026-09-27",
     "sources": [
       "official: eng_celestian_insidiants_online_rules-lqzptdkmld-qrehe4wai4.pdf"
     ],
@@ -27,16 +25,6 @@
     "unresolved": []
   },
   "vocab": {
-    "windows": [
-      "strategy_phase",
-      "activation.own",
-      "combat.shoot",
-      "combat.fight",
-      "combat.retaliate",
-      "defence.shooting",
-      "counteract",
-      "any"
-    ],
     "durations": [
       "instant",
       "this_sequence",
@@ -44,51 +32,6 @@
       "this_counteraction",
       "end_of_turning_point",
       "battle"
-    ],
-    "triggers": [
-      "turning_point.start",
-      "strategy_phase",
-      "activation.start",
-      "combat.shoot.before_roll",
-      "combat.shoot.after_roll",
-      "combat.fight.before_roll",
-      "combat.fight.after_roll",
-      "combat.retaliate.before_roll",
-      "combat.retaliate.after_roll",
-      "defence.shooting.before_roll",
-      "defence.shooting.after_roll",
-      "counteract.available",
-      "turning_point.end"
-    ],
-    "contexts": [
-      {
-        "id": "strategy_phase",
-        "label": "Strategy"
-      },
-      {
-        "id": "activation.own",
-        "label": "Activating"
-      },
-      {
-        "id": "combat.shoot",
-        "label": "Shooting"
-      },
-      {
-        "id": "combat.fight",
-        "label": "Fighting"
-      },
-      {
-        "id": "combat.retaliate",
-        "label": "Retaliating"
-      },
-      {
-        "id": "defence.shooting",
-        "label": "Defending"
-      },
-      {
-        "id": "counteract",
-        "label": "Counteracting"
-      }
     ],
     "phases": [
       "strategy",
@@ -157,12 +100,6 @@
       "duration": "instant",
       "text": "After rolling your attack or defence dice, re-roll one of those dice. No limit per turning point.",
       "universal": true,
-      "windows": [
-        "combat.shoot",
-        "combat.fight",
-        "combat.retaliate",
-        "defence.shooting"
-      ],
       "source": "official PDF, August '26",
       "when": "any",
       "appliesTo": "team",
@@ -238,7 +175,6 @@
       "duration": "end_of_turning_point",
       "text": "Select one enemy operative or marker. If an operative, it and each other enemy operative visible to and within 2\" of it gains one of your Suspicion tokens until the end of the turning point; if a marker, each enemy operative contesting it gains one. Whenever a friendly operative is shooting against or fighting against an operative that has one of your Suspicion tokens, its weapons have the Punishing weapon rule.",
       "once_per": "turning_point",
-      "window": "strategy_phase",
       "source": "official PDF, August '26",
       "when": "attack",
       "appliesTo": "team",
@@ -265,7 +201,6 @@
       "duration": "end_of_turning_point",
       "text": "Whenever a wounded friendly operative is shooting against, fighting against or retaliating against an enemy operative, its weapons have the Balanced weapon rule.",
       "once_per": "turning_point",
-      "window": "strategy_phase",
       "source": "official PDF, August '26",
       "when": "attack",
       "appliesTo": "team",
@@ -292,7 +227,6 @@
       "duration": "end_of_turning_point",
       "text": "Whenever an operative is shooting a friendly operative that has an Engage order, you can re-roll one of your defence dice.",
       "once_per": "turning_point",
-      "window": "strategy_phase",
       "source": "official PDF, August '26",
       "when": "defence",
       "appliesTo": "team",
@@ -308,7 +242,6 @@
       "duration": "end_of_turning_point",
       "text": "Whenever an INSPIRING friendly operative is fighting or retaliating, Normal and Critical Dmg of 4 or more inflicts 1 less damage on that friendly operative.",
       "once_per": "turning_point",
-      "window": "strategy_phase",
       "source": "official PDF, August '26",
       "when": "defence",
       "appliesTo": "team",
@@ -324,7 +257,6 @@
       "duration": "instant",
       "text": "Use when a friendly operative is incapacitated while fighting or retaliating. You can strike the enemy operative in that sequence with one of your unresolved successes before it's removed from the killzone. If that enemy operative is incapacitated as a result, the friendly operative becomes INSPIRING before it's removed and you can resolve the Martyrdom faction rule.",
       "once_per": "turning_point",
-      "window": "any",
       "source": "official PDF, August '26",
       "when": "defence",
       "appliesTo": "team",
@@ -341,7 +273,6 @@
       "duration": "this_activation",
       "text": "Use during a friendly operative's activation, before or after it performs an action. Until the end of its activation, ignore any changes to its Move stat; if it's INSPIRING, add 1\" to its Move stat until the end of that activation. If it becomes INSPIRING by performing the Charge action, you can use this ploy before it moves to gain the additional movement.",
       "once_per": "turning_point",
-      "window": "any",
       "source": "official PDF, August '26",
       "when": "activation",
       "appliesTo": "team",
@@ -357,7 +288,6 @@
       "duration": "instant",
       "text": "Use when a friendly operative is fighting and you strike the enemy operative in that sequence with a critical success. After resolving that strike, also inflict D3 damage on each other enemy operative visible to and within 2\" of that friendly operative (roll separately for each). The friendly operative becomes INSPIRING if this incapacitates an enemy with a Wounds stat of 6 or more.",
       "once_per": "turning_point",
-      "window": "any",
       "source": "official PDF, August '26",
       "when": "attack",
       "appliesTo": "team",
@@ -373,7 +303,6 @@
       "duration": "instant",
       "text": "Use after rolling your attack dice for a friendly operative shooting against, fighting against or retaliating against an enemy operative that doesn't have the IMPERIUM keyword. Its weapons have the Ceaseless weapon rule until the end of that sequence; if that enemy also has the CHAOS and/or PSYKER keyword, they have the Relentless weapon rule instead.",
       "once_per": "turning_point",
-      "window": "any",
       "source": "official PDF, August '26",
       "when": "attack",
       "appliesTo": "team",
@@ -736,7 +665,6 @@
       ],
       "icon": "laurel",
       "accent": "#E8C27A",
-      "photo": null,
       "leader": true,
       "multiple": false,
       "role": "Leader",
@@ -774,7 +702,6 @@
       ],
       "icon": "chevron2",
       "accent": "#E8C27A",
-      "photo": null,
       "leader": false,
       "multiple": false,
       "role": "Abjuror",
@@ -806,7 +733,6 @@
       ],
       "icon": "crosshair",
       "accent": "#E8C27A",
-      "photo": null,
       "leader": false,
       "multiple": false,
       "role": "Censor",
@@ -852,7 +778,6 @@
       ],
       "icon": "launcher",
       "accent": "#E8C27A",
-      "photo": null,
       "leader": false,
       "multiple": true,
       "role": "Cremator",
@@ -892,7 +817,6 @@
       ],
       "icon": "rifle",
       "accent": "#E8C27A",
-      "photo": null,
       "leader": false,
       "multiple": false,
       "role": "Denuncia",
@@ -923,7 +847,6 @@
       ],
       "icon": "chainsword",
       "accent": "#E8C27A",
-      "photo": null,
       "leader": false,
       "multiple": false,
       "role": "Mortisanctus",
@@ -970,7 +893,6 @@
       ],
       "icon": "chevron2",
       "accent": "#E8C27A",
-      "photo": null,
       "leader": false,
       "multiple": false,
       "role": "Reliquarius",
@@ -1016,7 +938,6 @@
       ],
       "icon": "rifle",
       "accent": "#E8C27A",
-      "photo": null,
       "leader": false,
       "multiple": true,
       "role": "Warrior",

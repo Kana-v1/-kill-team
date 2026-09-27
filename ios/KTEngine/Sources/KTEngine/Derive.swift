@@ -249,7 +249,7 @@ extension Engine {
             appliesTo = e.appliesTo ?? .team
             requiresOperative = e.requiresOperative
             weaponMatch = e.weaponMatch ?? []
-            hint = option?.hint ?? option?.prompt ?? e.hint ?? e.text
+            hint = option?.hint ?? e.hint ?? e.text
             grants = (option?.grantsWeaponRules ?? []) + (e.grantsWeaponRules ?? [])
             duration = e.duration
             self.always = always
@@ -292,7 +292,7 @@ extension Engine {
             appliesTo = slot == "extra" ? .self : .team
             requiresOperative = nil
             weaponMatch = []
-            hint = t.hint ?? t.prompt ?? t.text
+            hint = t.hint ?? t.text
             grants = t.grantsWeaponRules ?? []
             duration = "battle"
             always = true
@@ -442,7 +442,7 @@ extension Engine {
         }
         guard let e = byId[id] else { return nil }
         let opts = (e.options ?? []).map { o in
-            (name: o.name, text: segments(o.hint ?? o.prompt ?? o.condition ?? "", excluding: e.name))
+            (name: o.name, text: segments(o.hint ?? o.condition ?? "", excluding: e.name))
         }
         return RuleInfo(title: e.name, kind: kindLabel(e, slot: nil), body: segments(e.text, excluding: e.name),
                         options: opts, version: version)

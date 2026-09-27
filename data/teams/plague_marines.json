@@ -3,8 +3,6 @@
     "team": "Plague Marines",
     "teamId": "CHAOS-PM",
     "edition": "Kill Team (2024)",
-    "schema": 1,
-    "compiled": "2026-09-19",
     "sources": [
       "official: eng_plague_marines_online_rules-wqjvit50wj-jvekzllwdl.pdf"
     ],
@@ -24,16 +22,6 @@
     "rulesVersion": "August '26"
   },
   "vocab": {
-    "windows": [
-      "strategy_phase",
-      "activation.own",
-      "combat.shoot",
-      "combat.fight",
-      "combat.retaliate",
-      "defence.shooting",
-      "counteract",
-      "any"
-    ],
     "durations": [
       "instant",
       "this_sequence",
@@ -41,51 +29,6 @@
       "this_counteraction",
       "end_of_turning_point",
       "battle"
-    ],
-    "triggers": [
-      "turning_point.start",
-      "strategy_phase",
-      "activation.start",
-      "combat.shoot.before_roll",
-      "combat.shoot.after_roll",
-      "combat.fight.before_roll",
-      "combat.fight.after_roll",
-      "combat.retaliate.before_roll",
-      "combat.retaliate.after_roll",
-      "defence.shooting.before_roll",
-      "defence.shooting.after_roll",
-      "counteract.available",
-      "turning_point.end"
-    ],
-    "contexts": [
-      {
-        "id": "strategy_phase",
-        "label": "Strategy"
-      },
-      {
-        "id": "activation.own",
-        "label": "Activating"
-      },
-      {
-        "id": "combat.shoot",
-        "label": "Shooting"
-      },
-      {
-        "id": "combat.fight",
-        "label": "Fighting"
-      },
-      {
-        "id": "combat.retaliate",
-        "label": "Retaliating"
-      },
-      {
-        "id": "defence.shooting",
-        "label": "Defending"
-      },
-      {
-        "id": "counteract",
-        "label": "Counteracting"
-      }
     ],
     "phases": [
       "strategy",
@@ -112,15 +55,8 @@
       "cost": {
         "cp": 1
       },
-      "windows": [
-        "combat.shoot",
-        "combat.fight",
-        "combat.retaliate",
-        "defence.shooting"
-      ],
       "duration": "instant",
       "text": "After rolling your attack or defence dice, re-roll one of those dice. No limit per turning point.",
-      "remind_at": [],
       "source": "core rules",
       "when": "any",
       "appliesTo": "team",
@@ -136,14 +72,6 @@
       "alwaysOn": true,
       "duration": "battle",
       "text": "During each friendly Plague Marine's activation it can take two Shoot actions or two Fight actions. If two Shoot, a bolt pistol, boltgun or PSYCHIC weapon must be selected for at least one; you cannot select the same PSYCHIC ranged weapon more than once per activation. Each friendly Plague Marine can counteract regardless of its order.",
-      "remind_at": [
-        "activation.start",
-        "counteract.available"
-      ],
-      "prompts": {
-        "activation.start": "Take TWO Shoot or TWO Fight actions (if two Shoot, at least one with a bolt pistol, boltgun or Psychic weapon; no repeating a Psychic ranged weapon).",
-        "counteract.available": "Can counteract regardless of this operative's order."
-      },
       "source": "official PDF, August '26",
       "when": "activation",
       "appliesTo": "team",
@@ -159,18 +87,6 @@
       "alwaysOn": true,
       "duration": "battle",
       "text": "Poison weapon rule: in the Resolve Attack Dice step, if a Poison weapon inflicts damage with any successes, the target (excluding friendly Plague Marines) gains one of your Poison tokens if it doesn't have one. Whenever an operative that has one of your Poison tokens is activated, inflict 1 damage on it.",
-      "remind_at": [
-        "activation.start",
-        "combat.shoot.after_roll",
-        "combat.fight.after_roll",
-        "combat.retaliate.after_roll"
-      ],
-      "prompts": {
-        "activation.start": "Poisoned enemy activating? Deal it 1 damage.",
-        "combat.shoot.after_roll": "Poison weapon dealt damage? The target (not a Plague Marine) gains a Poison token.",
-        "combat.fight.after_roll": "Poison weapon dealt damage? The target (not a Plague Marine) gains a Poison token.",
-        "combat.retaliate.after_roll": "Poison weapon dealt damage? The target (not a Plague Marine) gains a Poison token."
-      },
       "source": "official PDF, August '26",
       "when": "attack",
       "appliesTo": "team",
@@ -186,14 +102,6 @@
       "alwaysOn": true,
       "duration": "battle",
       "text": "Whenever an attack dice inflicts damage of 3 or more on a friendly Plague Marine, roll one D6: on a 4+, subtract 1 from that inflicted damage.",
-      "remind_at": [
-        "defence.shooting.after_roll",
-        "combat.fight.after_roll",
-        "combat.retaliate.after_roll"
-      ],
-      "prompts": {
-        "*": "Took 3+ damage on one die? Roll a D6 — on 4+, subtract 1 from that damage."
-      },
       "source": "official PDF, August '26",
       "when": "defence",
       "appliesTo": "team",
@@ -206,19 +114,9 @@
       "cost": {
         "cp": 1
       },
-      "window": "strategy_phase",
       "once_per": "turning_point",
       "duration": "end_of_turning_point",
       "text": "Subtract 2\" from the Move stat of an enemy operative and worsen the Hit stat of its weapons by 1 (not cumulative with being injured) whenever either is true: it has one of your Poison tokens and is visible to (or vice versa) and within 3\" of friendly Plague Marines; or it's visible to (or vice versa) and within 3\" of a friendly Plague Marine Icon Bearer.",
-      "remind_at": [
-        "activation.start",
-        "combat.shoot.before_roll",
-        "combat.fight.before_roll",
-        "combat.retaliate.before_roll"
-      ],
-      "prompts": {
-        "*": "Enemy −2\" Move and −1 Hit while poisoned within 3\" of a Plague Marine, or within 3\" of your Icon Bearer."
-      },
       "source": "official PDF, August '26",
       "when": "defence",
       "appliesTo": "team",
@@ -231,18 +129,9 @@
       "cost": {
         "cp": 1
       },
-      "window": "strategy_phase",
       "once_per": "turning_point",
       "duration": "end_of_turning_point",
       "text": "Whenever a friendly Plague Marine is shooting or fighting during an activation in which it hasn't moved more than 3\", or whenever it's retaliating, its weapons have the Ceaseless weapon rule.",
-      "remind_at": [
-        "combat.shoot.before_roll",
-        "combat.fight.before_roll",
-        "combat.retaliate.before_roll"
-      ],
-      "prompts": {
-        "*": "Ceaseless (re-roll any attack dice) when shooting/fighting after moving ≤3\" this activation, or whenever retaliating."
-      },
       "source": "official PDF, August '26",
       "when": "attack",
       "appliesTo": "team",
@@ -266,16 +155,9 @@
       "cost": {
         "cp": 1
       },
-      "window": "strategy_phase",
       "once_per": "turning_point",
       "duration": "end_of_turning_point",
       "text": "Place one of your Cloud of Flies markers in the killzone. Whenever an operative is shooting a friendly Plague Marine that's more than 3\" from it, if that friendly operative is wholly within 1\" of that marker, it is obscured. Remove the marker in the Ready step of the next Strategy phase.",
-      "remind_at": [
-        "defence.shooting.before_roll"
-      ],
-      "prompts": {
-        "*": "A Plague Marine more than 3\" from its shooter and wholly within 1\" of your marker is obscured."
-      },
       "source": "official PDF, August '26",
       "when": "defence",
       "appliesTo": "team",
@@ -288,17 +170,9 @@
       "cost": {
         "cp": 1
       },
-      "window": "strategy_phase",
       "once_per": "turning_point",
       "duration": "end_of_turning_point",
       "text": "Select one enemy operative within 3\" of a friendly Plague Marine, or one enemy operative that has one of your Poison tokens and is within 7\" of a friendly Plague Marine. Until the end of the selected operative's next activation, subtract 1 from its APL stat.",
-      "remind_at": [
-        "turning_point.start",
-        "strategy_phase"
-      ],
-      "prompts": {
-        "*": "Give an enemy −1 APL until the end of its next activation (within 3\" of a Plague Marine, or poisoned within 7\")."
-      },
       "source": "official PDF, August '26",
       "when": "any",
       "appliesTo": "team",
@@ -311,19 +185,8 @@
       "cost": {
         "cp": 1
       },
-      "windows": [
-        "activation.own",
-        "counteract"
-      ],
       "duration": "instant",
       "text": "Use during a friendly Plague Marine's activation or counteraction, before or after it performs an action. One enemy operative within 3\" of, or visible to and within 7\" of, that operative gains one of your Poison tokens (if it doesn't already have one).",
-      "remind_at": [
-        "activation.start",
-        "counteract.available"
-      ],
-      "prompts": {
-        "*": "Before/after an action: an enemy within 3\", or visible and within 7\", gains a Poison token."
-      },
       "source": "official PDF, August '26",
       "once_per": "turning_point",
       "when": "activation",
@@ -337,13 +200,8 @@
       "cost": {
         "cp": 1
       },
-      "window": "any",
       "duration": "instant",
       "text": "Use when a friendly Plague Marine is incapacitated, before it's removed from the killzone. Each enemy operative visible to and within 3\" of that operative gains one of your Poison tokens (if it doesn't have one); for each of those enemy operatives that already has one (including if gained during this action), inflict 1 damage on them instead.",
-      "remind_at": [],
-      "prompts": {
-        "*": "On a Plague Marine's death: each enemy within 3\" gains a Poison token; already-poisoned ones take 1 damage instead."
-      },
       "source": "official PDF, August '26",
       "once_per": "turning_point",
       "when": "defence",
@@ -358,21 +216,8 @@
       "cost": {
         "cp": 1
       },
-      "windows": [
-        "defence.shooting",
-        "combat.fight",
-        "combat.retaliate"
-      ],
       "duration": "this_activation",
       "text": "Use when an attack dice inflicts damage on a friendly Plague Marine. Until the end of the activation or counteraction, for the Disgustingly Resilient rule for that operative, always subtract 1 from the damage inflicted (to a minimum of 2) — you don't need to roll.",
-      "remind_at": [
-        "defence.shooting.after_roll",
-        "combat.fight.after_roll",
-        "combat.retaliate.after_roll"
-      ],
-      "prompts": {
-        "*": "Until the end of this activation, Disgustingly Resilient auto-subtracts 1 (min 2) — no roll."
-      },
       "source": "official PDF, August '26",
       "once_per": "turning_point",
       "when": "defence",
@@ -386,21 +231,8 @@
       "cost": {
         "cp": 1
       },
-      "windows": [
-        "combat.shoot",
-        "combat.fight",
-        "combat.retaliate"
-      ],
       "duration": "instant",
       "text": "Use when a friendly Plague Marine is shooting against or fighting against an enemy operative within 3\" of it (or within 7\" if that enemy has one of your Poison tokens), after your opponent rolls their attack or defence dice. For each result of 3 they roll, inflict 1 damage on that enemy; that result cannot be retained as a success and they cannot re-roll it.",
-      "remind_at": [
-        "combat.shoot.after_roll",
-        "combat.fight.after_roll",
-        "combat.retaliate.after_roll"
-      ],
-      "prompts": {
-        "*": "After they roll, each 3 deals 1 damage and can't be retained as a success or re-rolled. Enemy within 3\", 7\" if poisoned."
-      },
       "source": "official PDF, August '26",
       "once_per": "turning_point",
       "when": "attack",
@@ -417,16 +249,6 @@
       "alwaysOn": true,
       "duration": "battle",
       "text": "You can ignore any changes to the stats of friendly Plague Marine operatives from being injured (including their weapons' stats).",
-      "remind_at": [
-        "activation.start",
-        "combat.shoot.before_roll",
-        "combat.fight.before_roll",
-        "combat.retaliate.before_roll",
-        "defence.shooting.before_roll"
-      ],
-      "prompts": {
-        "*": "Ignore injured-stat changes on friendly Plague Marines (weapons included)."
-      },
       "source": "official PDF, August '26",
       "when": "any",
       "appliesTo": "team",
@@ -442,12 +264,6 @@
       "alwaysOn": true,
       "duration": "battle",
       "text": "Friendly Plague Marine operatives' boltguns and bolt pistols have the Poison and Severe weapon rules.",
-      "remind_at": [
-        "combat.shoot.before_roll"
-      ],
-      "prompts": {
-        "*": "Friendly Plague Marines' boltguns and bolt pistols have Poison and Severe."
-      },
       "source": "official PDF, August '26",
       "when": "attack",
       "appliesTo": "weapons",
@@ -479,12 +295,6 @@
       "alwaysOn": true,
       "duration": "battle",
       "text": "Friendly Plague Marine operatives have the Blight grenade ranged weapon (ATK 4, Hit 4+, Dmg 2/4, Range 6\", Blast 2\", Saturate, Severe, Poison). You cannot select it for use more than twice during the battle.",
-      "remind_at": [
-        "combat.shoot.before_roll"
-      ],
-      "prompts": {
-        "*": "Blight grenade: ATK 4 · Hit 4+ · Dmg 2/4 · Range 6\", Blast 2\", Saturate, Severe, Poison. Max twice per battle."
-      },
       "source": "official PDF, August '26",
       "when": "attack",
       "appliesTo": "team",
@@ -500,13 +310,6 @@
       "alwaysOn": true,
       "duration": "battle",
       "text": "Whenever an enemy operative is activated within 3\" of a friendly Plague Marine: if it doesn't have one of your Poison tokens, roll one D3 — on a 3 it gains one; if it has one of your Poison tokens, inflict D3 damage on it (instead of 1).",
-      "remind_at": [
-        "turning_point.start",
-        "activation.start"
-      ],
-      "prompts": {
-        "*": "Enemy activating within 3\" of a Plague Marine: unpoisoned → roll D3, on 3 it gains a token; poisoned → D3 damage instead of 1."
-      },
       "source": "official PDF, August '26",
       "when": "any",
       "appliesTo": "team",
@@ -523,14 +326,6 @@
       "duration": "battle",
       "requiresOperative": "plague_marine_champion",
       "text": "Whenever an enemy operative that has one of your Poison tokens loses one or more wounds within 7\" of this operative, this operative regains up to an equal number of lost wounds (to a maximum of 3 lost wounds per turning point, and only if this operative isn't incapacitated).",
-      "remind_at": [
-        "combat.shoot.after_roll",
-        "combat.fight.after_roll",
-        "combat.retaliate.after_roll"
-      ],
-      "prompts": {
-        "*": "Poisoned enemy loses wounds within 7\" of the Champion? It regains that many (max 3 per turning point)."
-      },
       "source": "official PDF, August '26",
       "when": "any",
       "appliesTo": "self",
@@ -547,7 +342,6 @@
       "duration": "battle",
       "requiresOperative": "plague_marine_icon_bearer",
       "text": "Whenever determining control of a marker, treat this operative's APL stat as 1 higher. This isn't a change to its APL stat, so it is cumulative with any such changes.",
-      "remind_at": [],
       "source": "official PDF, August '26",
       "when": "any",
       "appliesTo": "self",
@@ -564,7 +358,6 @@
       "duration": "battle",
       "requiresOperative": "plague_marine_icon_bearer",
       "text": "Whenever this operative is within your opponent's territory, the Contagion strategy ploy costs you 0CP.",
-      "remind_at": [],
       "costOverrides": [
         {
           "effect": "pm.strat.contagion",
@@ -588,12 +381,6 @@
       "duration": "battle",
       "requiresOperative": "plague_marine_warrior",
       "text": "Whenever an operative is shooting this operative, defence dice results of 5+ are critical successes.",
-      "remind_at": [
-        "defence.shooting.before_roll"
-      ],
-      "prompts": {
-        "*": "When this Warrior is shot, its defence dice of 5+ are critical successes."
-      },
       "source": "official PDF, August '26",
       "when": "defence",
       "appliesTo": "self",
@@ -610,12 +397,6 @@
       "duration": "battle",
       "requiresOperative": "plague_marine_bombardier",
       "text": "This operative can use blight and krak grenades (see faction and universal equipment). Doing so doesn't count towards any limited uses. Whenever it does, improve the Hit stat of that weapon by 1, and blight grenades have the Toxic weapon rule.",
-      "remind_at": [
-        "combat.shoot.before_roll"
-      ],
-      "prompts": {
-        "*": "Bombardier uses blight and krak grenades free of their limited uses, at +1 Hit; its blight grenades gain Toxic."
-      },
       "source": "official PDF, August '26",
       "when": "attack",
       "appliesTo": "self",
@@ -632,12 +413,6 @@
       "duration": "battle",
       "requiresOperative": "malignant_plaguecaster",
       "text": "PSYCHIC action (1AP): select one enemy operative visible to and within 7\" of this operative, or one enemy operative that's a valid target. That enemy gains one of your Poison tokens (if it doesn't have one); if it already has one, inflict 3 damage on it instead. This operative cannot perform this action while within control range of an enemy operative.",
-      "remind_at": [
-        "activation.start"
-      ],
-      "prompts": {
-        "*": "1AP Psychic: an enemy within 7\" gains a Poison token; if already poisoned, deal 3 damage instead. Not in enemy control range."
-      },
       "source": "official PDF, August '26",
       "when": "activation",
       "appliesTo": "self",
@@ -654,12 +429,6 @@
       "duration": "battle",
       "requiresOperative": "malignant_plaguecaster",
       "text": "PSYCHIC action (1AP): select one friendly operative visible to and within 3\" of this operative, then roll 2D6. If the result is 7, that operative regains 7 lost wounds; otherwise it regains lost wounds equal to the highest D6. Not while within control range of an enemy operative, or more than once per turning point.",
-      "remind_at": [
-        "activation.start"
-      ],
-      "prompts": {
-        "*": "1AP Psychic: a friendly operative within 3\" rolls 2D6 — on a 7 regains 7 wounds, else the highest D6. Once per turning point; not in enemy control range."
-      },
       "source": "official PDF, August '26",
       "when": "activation",
       "appliesTo": "self",
@@ -676,13 +445,6 @@
       "duration": "battle",
       "requiresOperative": "plague_marine_fighter",
       "text": "Action (1AP): inflict D3+2 damage on each other operative both visible to and within 2\" of this operative. Roll separately for each: if it's an enemy operative and the D3 result is a 3, it also gains one of your Poison tokens (if it doesn't already have one). For action restrictions and the Astartes rule, this counts as a Fight action. Cannot be performed while this operative has a Conceal order.",
-      "remind_at": [
-        "activation.start",
-        "combat.fight.before_roll"
-      ],
-      "prompts": {
-        "*": "1AP (counts as Fight): D3+2 damage to each other operative visible and within 2\"; on a D3 of 3, enemies also gain a Poison token. Not on Conceal."
-      },
       "source": "official PDF, August '26",
       "when": "attack",
       "appliesTo": "self",
@@ -732,7 +494,6 @@
       ],
       "icon": "laurel",
       "accent": "#B8C36B",
-      "photo": null,
       "leader": true,
       "multiple": false,
       "role": "Leader",
@@ -781,7 +542,6 @@
       ],
       "icon": "crosshair",
       "accent": "#7FB29A",
-      "photo": null,
       "leader": false,
       "multiple": false,
       "role": "Psyker",
@@ -821,7 +581,6 @@
       ],
       "icon": "grenade",
       "accent": "#9AAD5B",
-      "photo": null,
       "leader": false,
       "multiple": false,
       "role": "Bombardier",
@@ -861,7 +620,6 @@
       ],
       "icon": "chainsword",
       "accent": "#A8B060",
-      "photo": null,
       "leader": false,
       "multiple": false,
       "role": "Fighter",
@@ -908,7 +666,6 @@
       ],
       "icon": "heavy",
       "accent": "#8B9A4E",
-      "photo": null,
       "leader": false,
       "multiple": false,
       "role": "Heavy Gunner",
@@ -949,7 +706,6 @@
       ],
       "icon": "chevron2",
       "accent": "#C2CE77",
-      "photo": null,
       "leader": false,
       "multiple": false,
       "role": "Icon Bearer",
@@ -989,7 +745,6 @@
       ],
       "icon": "rifle",
       "accent": "#93A557",
-      "photo": null,
       "leader": false,
       "multiple": false,
       "role": "Warrior",

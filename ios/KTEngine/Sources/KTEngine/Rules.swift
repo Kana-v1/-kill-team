@@ -55,7 +55,6 @@ public struct Effect: Codable {
     public var options: [Option]?
     public var requiresOperative: String?
     public var alwaysOn: Bool?
-    public var costOverride: Override?
     public var costOverrides: [Override]?
     public var changesOptionOf: String?
     public var requires: Requires?
@@ -74,17 +73,12 @@ public struct Effect: Codable {
 
     enum CodingKeys: String, CodingKey {
         case id, name, kind, universal, cost, duration, text, options, requiresOperative, alwaysOn,
-             costOverride, costOverrides, changesOptionOf, requires, disputed, verify,
+             costOverrides, changesOptionOf, requires, disputed, verify,
              when, appliesTo, weaponMatch, hint, grantsWeaponRules, trigger, requiresStatus
         case oncePer = "once_per"
     }
 
-    /// Cost overrides as one list (the singular field is legacy).
-    public var overrides: [Override] {
-        if let list = costOverrides, !list.isEmpty { return list }
-        if let one = costOverride { return [one] }
-        return []
-    }
+    public var overrides: [Override] { costOverrides ?? [] }
 
     public var isAlwaysOn: Bool { alwaysOn ?? false }
     public var isPloy: Bool { kind == "strategy_ploy" || kind == "firefight_ploy" }
@@ -94,7 +88,6 @@ public struct Option: Codable {
     public var id: String
     public var name: String
     public var condition: String?
-    public var prompt: String?
     public var hint: String?
     public var grantsWeaponRules: [Grant]?
 }
@@ -139,7 +132,6 @@ public struct Operative: Codable {
     public var weapons: [Weapon]
     public var icon: String
     public var accent: String
-    public var photo: String?
     public var leader: Bool
     public var multiple: Bool
     public var role: String
@@ -181,7 +173,6 @@ public struct ChapterTactic: Codable {
     public var id: String
     public var name: String
     public var text: String
-    public var prompt: String?
     public var when: When?
     public var hint: String?
     public var grantsWeaponRules: [Grant]?

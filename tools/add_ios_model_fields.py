@@ -5,7 +5,7 @@ Per effect / chapter tactic:
   when          activation | attack | defence | any — which group it shows in
   appliesTo     team | self | weapons — who it applies to (self = its requiresOperative)
   weaponMatch   for appliesTo=weapons: case-insensitive substrings of weapon names
-  hint          one action-first line for mid-game (the old per-trigger prompts)
+  hint          one action-first line for mid-game
   grantsWeaponRules  [{match, rules, condition?}] — weapon-row notes; match is
                 "*", "ranged", "melee" or weapon-name substrings
 Per team: glossary of faction terms (definitions copied from the verified census text).
@@ -176,10 +176,11 @@ def apply(team, table, grants, weapon_match, option_grants=None, tactics=None, g
         for o in e.get("options", []):
             if option_grants and o["id"] in option_grants:
                 o["grantsWeaponRules"] = option_grants[o["id"]]
-            o["hint"] = o.get("prompt", "")
+            o.setdefault("hint", "")
     for t in d.get("chapterTactics", []):
         when, g = tactics[t["id"]]
-        t["when"], t["hint"] = when, t.get("prompt", t["text"])
+        t["when"] = when
+        t.setdefault("hint", t["text"])
         if g:
             t["grantsWeaponRules"] = [g]
     if glossary:

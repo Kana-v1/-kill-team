@@ -46,16 +46,16 @@ The app must never model:
 | `.github/workflows/ios.yml` | CI: engine tests, then an unsigned `.ipa`. **CI is the only iOS compiler.** |
 | `data/teams/<id>.json` | Rules census per team: the single source of truth. |
 | `data/core/glossary.json` | Core weapon-rule definitions, transcribed from the official Lite rules page. |
-| `tools/rules-pipeline/` | Sync, extract, audit. See its README. |
+| `tools/rules-pipeline/` | Sync, extract, audit (`sync_sources.py`, `update-rules.sh`, `columns.py`, `audit.py`). |
+| `tools/app_icon.py` | Draws the app icon. |
 | `tools/add_ios_model_fields.py` | The reviewed table of `when`, `appliesTo`, `hint` and grants per rule. Re-run after census edits. |
-| `legacy/` | The original single-file app and the Go/React web version. Not built. |
 
 Design canvas (screens, look): https://claude.ai/artifact/3vAvcCWU9RVELrduYHkHWA
 
 ## Architecture
 
 ```
-GameLog.events   append-only: PHASE, CP, TP_NEXT(ini), ACTIVATE, END, OP, DOWN, LEADER, ROSTER, COUNT, EQUIP, TACTIC, …
+GameLog.events   append-only: PHASE, CP, TP_NEXT(ini), ACTIVATE, END, OP, DOWN, LEADER, ROSTER, COUNT, EQUIP, TACTIC, STATUS, …
   ↓ fold()       Engine.apply → GameState { tp, cp, phase, roster, op, dead, equip, tactics, active, used, paid, … }
   ↓ derive()     + rules → Snapshot { use[when], active[when] for the acting operative, elsewhere, weaponNotes, summary }
   → SwiftUI      renders the Snapshot; every tap is one Event (GameStore.send), saved to Documents/game.json
@@ -130,12 +130,17 @@ Vocabularies are closed (`vocab` in each census). If a card genuinely needs a ne
 Secondary sites (ktdash, ktdojo, wahapedia) are hints only; they have been wrong. A web-searched
 January PDF once nearly deleted real weapons that the August update had added.
 
-Get rules **only** through the pipeline (`tools/rules-pipeline/README.md`):
+Get rules **only** through the pipeline:
 `update-rules.sh --sync --all`, then `audit.py <team>`, then a visual pass on the rendered pages, then
-a reviewed edit (`reconcile_2026_09.py` is the worked example), then `tools/add_ios_model_fields.py`.
+a reviewed edit of the census, then `tools/add_ios_model_fields.py`.
 - **Never web-search for a PDF link or hand-edit one.** `sync_sources.py` reads the downloads page's
-  own API.
+  own API (POST `https://www.warhammer-community.com/api/search/downloads/` with
+  `{"index":"downloads_v2","searchTerm":"","gameSystem":"kill-team","language":"english"}`)
+  and rewrites `sources.json`. `sync_sources.py --check` exits 1 if GW published something newer.
 - **Never `WebFetch` a PDF.** It returns a model's summary, which has invented rules.
+- `lit` (liteparse 2.x) does the extraction. Under WSL the Windows `lit` rejects UNC paths, so
+  `update-rules.sh` stages PDFs in a Windows temp dir. Outputs (`data/pdf/`, `data/extracted/`) are
+  git-ignored: GW's PDFs never go in this public repo.
 - **Text extraction can't see strikethrough,** so deleted errata text reads as live. Check errata
   boxes on the page images.
 - Glossary definitions come from the official Lite rules page, read visually, never from memory.
