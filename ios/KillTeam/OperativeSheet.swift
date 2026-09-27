@@ -1,4 +1,6 @@
 import SwiftUI
+import PhotosUI
+import UniformTypeIdentifiers
 import KTEngine
 
 /// The acting operative's datacard (canvas "Operative sheet"): switch who's
@@ -7,6 +9,10 @@ import KTEngine
 struct OperativeSheet: View {
     @EnvironmentObject private var store: GameStore
     @Environment(\.dismiss) private var dismiss
+    @State private var pickedItem: PhotosPickerItem?
+    @State private var pickingFile = false
+    /// Ploys to offer the moment an operative is marked incapacitated (Poisonous Demise).
+    @State private var deathOffer: UsableCard?
 
     private var snap: Snapshot { store.snapshot }
 
@@ -21,7 +27,11 @@ struct OperativeSheet: View {
                         weapons(op)
                         applies
                         Button {
+                            let goingDown = !snap.dead.contains(snap.op)
                             store.send(Event(.down, Params(id: snap.op)))
+                            if goingDown {
+                                deathOffer = store.snapshot.use.flatMap(\.cards).first { $0.trigger == "incapacitated" && $0.afford }
+                            }
                         } label: {
                             Text(snap.dead.contains(snap.op) ? "Back in action" : "Mark incapacitated")
                                 .font(.headline).frame(maxWidth: .infinity).frame(height: 50)
@@ -38,7 +48,31 @@ struct OperativeSheet: View {
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } }
             }
-            .ruleTerms(store.engine)
+            .ruleInfo(store.engine)
+            .confirmationDialog(deathOffer.map { "Use \($0.name)?" } ?? "",
+                                isPresented: Binding(get: { deathOffer != nil }, set: { if !$0 { deathOffer = nil } }),
+                                titleVisibility: .visible, presenting: deathOffer) { card in
+                Button("\(card.name) — \(card.free ? "free" : "\(card.cp) CP")") {
+                    store.send(Event(.activate, Params(id: card.id)))
+                }
+                Button("Not now", role: .cancel) {}
+            } message: { card in
+                Text(card.hint.map(\.t).joined())
+            }
+            .onChange(of: pickedItem) { _, item in
+                guard let item else { return }
+                let id = typeOf(snap.op)
+                Task {
+                    if let data = try? await item.loadTransferable(type: Data.self) { store.setPhoto(data, for: id) }
+                    pickedItem = nil
+                }
+            }
+            .fileImporter(isPresented: $pickingFile, allowedContentTypes: [.image]) { result in
+                guard case .success(let url) = result else { return }
+                let scoped = url.startAccessingSecurityScopedResource()
+                defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+                if let data = try? Data(contentsOf: url) { store.setPhoto(data, for: typeOf(snap.op)) }
+            }
         }
         .preferredColorScheme(.dark)
     }
@@ -51,10 +85,16 @@ struct OperativeSheet: View {
                 Button {
                     store.send(Event(.op, Params(id: inst)))
                 } label: {
-                    Text(shortName(inst))
-                        .font(.subheadline.weight(.semibold))
-                        .strikethrough(down)
-                        .padding(.horizontal, 12).frame(minHeight: 34)
+                    HStack(spacing: 6) {
+                        if let op = store.engine.operative(inst), let img = store.photo(for: op.id) {
+                            Image(uiImage: img).resizable().scaledToFill().frame(width: 24, height: 24).clipShape(Circle())
+                        }
+                        Text(shortName(inst))
+                            .font(.subheadline.weight(.semibold))
+                            .strikethrough(down)
+                    }
+                    .padding(.leading, store.engine.operative(inst).flatMap { store.photo(for: $0.id) } == nil ? 12 : 5)
+                    .padding(.trailing, 12).frame(minHeight: 34)
                         .foregroundStyle(selected ? Color.black : (down ? Theme.muted : Theme.text))
                         .background(selected ? Theme.text : Theme.raised, in: Capsule())
                 }
@@ -65,10 +105,27 @@ struct OperativeSheet: View {
 
     private func identity(_ op: Operative) -> some View {
         HStack(spacing: 14) {
-            Glyph(operative: op, size: 34)
-                .frame(width: 64, height: 64)
-                .background(Theme.raised, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+            Menu {
+                PhotosPicker(selection: $pickedItem, matching: .images) {
+                    Label("Choose from Photos", systemImage: "photo.on.rectangle")
+                }
+                Button { pickingFile = true } label: { Label("Choose from Files", systemImage: "folder") }
+                if store.photo(for: op.id) != nil {
+                    Button(role: .destructive) { store.removePhoto(for: op.id) } label: {
+                        Label("Remove photo", systemImage: "trash")
+                    }
+                }
+            } label: {
+                Glyph(operative: op, photo: store.photo(for: op.id), size: 34)
+                    .frame(width: 64, height: 64)
+                    .background(Theme.raised, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .overlay(alignment: .bottomTrailing) {
+                        Image(systemName: "camera.fill").font(.system(size: 10, weight: .bold))
+                            .padding(5).background(Theme.selected, in: Circle()).offset(x: 4, y: 4)
+                    }
+            }
+            .accessibilityLabel("Set \(op.name)'s photo")
             VStack(alignment: .leading, spacing: 2) {
                 Text(op.name).font(.title2.bold())
                 Text(op.role + (snap.dead.contains(snap.op) ? " · incapacitated" : ""))

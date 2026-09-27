@@ -53,8 +53,12 @@ public struct UsableCard {
     public var maybe: [MaybeRoute]
     public var options: [OptionQuote]
     public var disputed: Bool
+    /// Offered when the app sees this moment happen (e.g. "incapacitated").
+    public var trigger: String?
 
     public var reduced: Bool { cp < costBase }
+    /// Options cheaper than the base price (Doctrine Warfare's free doctrines).
+    public var cheaperOptions: [OptionQuote] { options.filter { $0.cp < costBase } }
     public var free: Bool { cp == 0 }
 }
 
@@ -194,7 +198,7 @@ extension Engine {
             costBase: e.cost.cp, cp: q.cp, afford: s.cp >= q.cp, discount: discount,
             maybe: q.maybe.map { MaybeRoute(from: $0.from, options: $0.options, condition: $0.condition ?? "",
                                              needsOperative: $0.needs.flatMap { opById[$0]?.name }) },
-            options: options, disputed: e.disputed ?? false)
+            options: options, disputed: e.disputed ?? false, trigger: e.trigger)
     }
 
     // MARK: in play
@@ -353,5 +357,37 @@ extension Engine {
         if let slot { k += " · \(slot)" }
         if let who = requiresOperative, let o = opById[who] { k += " · \(o.name)" }
         return k
+    }
+}
+
+/// The full text of any rule, for the "tap a name to read it" sheets.
+public struct RuleInfo: Equatable {
+    public var title: String
+    public var kind: String
+    public var body: [Segment]
+    /// Sub-choices with their conditions (Combat Doctrine's doctrines).
+    public var options: [(name: String, text: [Segment])]
+    public var version: String?
+
+    public static func == (a: RuleInfo, b: RuleInfo) -> Bool {
+        a.title == b.title && a.kind == b.kind && a.body == b.body && a.version == b.version
+            && a.options.map(\.name) == b.options.map(\.name)
+    }
+}
+
+extension Engine {
+    /// Full rule text by id: an effect id, or "tactic.<id>" for a chapter tactic.
+    public func ruleInfo(_ id: String) -> RuleInfo? {
+        let version = rules.meta.rulesVersion
+        if id.hasPrefix("tactic."), let t = rules.chapterTactics.first(where: { "tactic.\($0.id)" == id }) {
+            return RuleInfo(title: t.name, kind: "Chapter tactic", body: segments(t.text, excluding: t.name),
+                            options: [], version: version)
+        }
+        guard let e = byId[id] else { return nil }
+        let opts = (e.options ?? []).map { o in
+            (name: o.name, text: segments(o.hint ?? o.prompt ?? o.condition ?? "", excluding: e.name))
+        }
+        return RuleInfo(title: e.name, kind: kindLabel(e, slot: nil), body: segments(e.text, excluding: e.name),
+                        options: opts, version: version)
     }
 }

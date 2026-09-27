@@ -1,12 +1,11 @@
-# Legacy single-file tracker
+# Legacy
 
-These are the original client-only app, superseded by the `backend/` (Go) +
-`frontend/` (React) split. They are kept for provenance only.
+Superseded versions of the tracker, kept for provenance. Nothing here is built
+or maintained; the app is `ios/`.
 
-- `tracker_src.html` — the whole app: style block, markup, and the
-  `events[] → fold() → derive() → render()` script inline. The Go engine in
-  `backend/internal/engine` is a direct, tested port of this script's reducer.
-- `build.js` — the old injector that inlined `aod.json` into the template.
-
-The canonical rules data (`data/teams/aod.json`) is unchanged and is now served
-by the backend instead of being injected at build time.
+- `tracker_src.html` + `build.js` — the original single-file, client-only app
+  (`events[] → fold() → derive() → render()` inline).
+- `web/` — the Go backend + React client that replaced it (2026-09), before the
+  native iOS app. The Swift engine in `ios/KTEngine` descends from
+  `web/backend/internal/engine`, with the later model changes (Strategy /
+  Firefight, per-unit applicability, glossary, initiative CP).

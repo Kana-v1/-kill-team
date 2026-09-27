@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import UIKit
 import KTEngine
 
 struct TeamInfo: Identifiable, Hashable {
@@ -15,6 +16,9 @@ final class GameStore: ObservableObject {
     @Published private(set) var snapshot: Snapshot
     /// "Fighter is acting — Sickening Resilience ended." after a new activation.
     @Published var toast: String?
+    /// Bumped when operative photos change, so views re-read them.
+    @Published private(set) var photoVersion = 0
+    private var photoCache: [String: UIImage] = [:]
 
     let teams: [TeamInfo]
     private let engines: [String: Engine]
@@ -79,6 +83,113 @@ final class GameStore: ObservableObject {
     private func refresh() {
         snapshot = engine.derive(state, logLength: game.events.count)
         save()
+    }
+
+    // MARK: operative photos
+    //
+    // The player's own pictures (or crops they made from their rules PDFs),
+    // kept on the phone only: Documents/photos/<operative id>.png. Operative ids
+    // are unique across teams, so one folder serves every team.
+
+    private static let photosDir: URL = {
+        let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("photos")
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        return dir
+    }()
+
+    func photo(for operativeId: String) -> UIImage? {
+        if let img = photoCache[operativeId] { return img }
+        let url = GameStore.photosDir.appendingPathComponent("\(operativeId).png")
+        guard let img = UIImage(contentsOfFile: url.path) else { return nil }
+        photoCache[operativeId] = img
+        return img
+    }
+
+    @discardableResult
+    func setPhoto(_ data: Data, for operativeId: String) -> Bool {
+        guard let img = UIImage(data: data), let png = GameStore.square(img, side: 256).pngData() else {
+            Log.write("photo for \(operativeId): not an image", "photos")
+            return false
+        }
+        do {
+            try png.write(to: GameStore.photosDir.appendingPathComponent("\(operativeId).png"), options: .atomic)
+            photoCache[operativeId] = UIImage(data: png)
+            photoVersion += 1
+            return true
+        } catch {
+            Log.write("saving photo for \(operativeId) failed: \(error)", "photos")
+            return false
+        }
+    }
+
+    func removePhoto(for operativeId: String) {
+        try? FileManager.default.removeItem(at: GameStore.photosDir.appendingPathComponent("\(operativeId).png"))
+        photoCache[operativeId] = nil
+        photoVersion += 1
+    }
+
+    /// Imports image files named after operatives ("plague_marine_champion.png"
+    /// or "Plague Marine Champion.jpg"). Returns how many matched.
+    @discardableResult
+    func importPhotos(from urls: [URL]) -> (matched: Int, unmatched: [String]) {
+        var matched = 0
+        var unmatched: [String] = []
+        for url in urls {
+            let scoped = url.startAccessingSecurityScopedResource()
+            defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+            let stem = url.deletingPathExtension().lastPathComponent
+            guard let id = operativeId(matching: stem), let data = try? Data(contentsOf: url), setPhoto(data, for: id) else {
+                unmatched.append(url.lastPathComponent)
+                continue
+            }
+            matched += 1
+        }
+        Log.write("imported \(matched) photos; unmatched: \(unmatched)", "photos")
+        return (matched, unmatched)
+    }
+
+    /// Picks up images dropped into the app's folder (Files app → On My iPhone
+    /// → Kill Team), assigns them, and removes the originals.
+    func importDroppedPhotos() {
+        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let files = (try? FileManager.default.contentsOfDirectory(at: docs, includingPropertiesForKeys: nil)) ?? []
+        let images = files.filter { ["png", "jpg", "jpeg", "heic", "webp"].contains($0.pathExtension.lowercased()) }
+        guard !images.isEmpty else { return }
+        let before = photoVersion
+        let result = importPhotos(from: images)
+        for url in images where operativeId(matching: url.deletingPathExtension().lastPathComponent) != nil {
+            try? FileManager.default.removeItem(at: url)
+        }
+        if photoVersion != before { toast = "Added \(result.matched) operative photo\(result.matched == 1 ? "" : "s")." }
+    }
+
+    private func operativeId(matching stem: String) -> String? {
+        let key = GameStore.slug(stem)
+        for engine in engines.values {
+            for op in engine.rules.operatives where op.id == key || GameStore.slug(op.name) == key {
+                return op.id
+            }
+        }
+        return nil
+    }
+
+    private static func slug(_ s: String) -> String {
+        s.lowercased().map { $0.isLetter || $0.isNumber ? $0 : "_" }
+            .reduce(into: "") { out, c in if !(c == "_" && out.last == "_") { out.append(c) } }
+            .trimmingCharacters(in: CharacterSet(charactersIn: "_"))
+    }
+
+    /// Centre-cropped square, scaled to `side` points at 1x.
+    private static func square(_ img: UIImage, side: CGFloat) -> UIImage {
+        let s = min(img.size.width, img.size.height)
+        let scale = side / s
+        let drawSize = CGSize(width: img.size.width * scale, height: img.size.height * scale)
+        let format = UIGraphicsImageRendererFormat.default()
+        format.scale = 1
+        return UIGraphicsImageRenderer(size: CGSize(width: side, height: side), format: format).image { _ in
+            img.draw(in: CGRect(x: (side - drawSize.width) / 2, y: (side - drawSize.height) / 2,
+                                width: drawSize.width, height: drawSize.height))
+        }
     }
 
     // MARK: persistence (best-effort: never crash over a file)

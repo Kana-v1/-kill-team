@@ -48,3 +48,8 @@ targets:
         UILaunchScreen: {}
         UIUserInterfaceStyle: Dark
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        # show the app's folder in the Files app, so operative photos can be
+        # dropped in (they're picked up and assigned by file name)
+        UIFileSharingEnabled: true
+        LSSupportsOpeningDocumentsInPlace: true
+        NSPhotoLibraryUsageDescription: Pick a photo of your model for an operative's portrait.

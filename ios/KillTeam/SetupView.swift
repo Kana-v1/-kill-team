@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 import KTEngine
 
 /// Settings-style setup (canvas "Setup"): kill team, leader, operatives,
@@ -8,6 +9,8 @@ struct SetupView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var pendingTeam: TeamInfo?
     @State private var confirmReset = false
+    @State private var importing = false
+    @State private var importResult: String?
 
     private var snap: Snapshot { store.snapshot }
     private var rules: RulesData { store.rules }
@@ -30,17 +33,20 @@ struct SetupView: View {
                     }
                 } header: { Text("Kill team") } footer: { Text("Switching kill team starts a new game.") }
 
-                Section("Leader") {
+                Section {
                     ForEach(rules.operatives.filter(\.leader), id: \.id) { o in
                         Button { store.send(Event(.leader, Params(id: o.id))) } label: {
                             HStack {
-                                Text(o.name).foregroundStyle(Theme.text)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(o.name).foregroundStyle(Theme.text)
+                                    Text(grants(o)).font(.caption).foregroundStyle(Theme.text2)
+                                }
                                 Spacer()
                                 if count(o.id) > 0 { Image(systemName: "checkmark").foregroundStyle(Theme.link) }
                             }
                         }
                     }
-                }
+                } header: { Text("Leader") } footer: { Text("Your leader changes which abilities and discounts you get.") }
 
                 Section {
                     ForEach(rules.operatives.filter { !$0.leader }, id: \.id) { o in
@@ -65,28 +71,38 @@ struct SetupView: View {
 
                 if !rules.chapterTactics.isEmpty {
                     Section("Chapter tactics") {
-                        tacticPicker("Primary", slot: "primary")
-                        tacticPicker("Secondary", slot: "secondary")
+                        tacticLink("Primary", slot: "primary")
+                        tacticLink("Secondary", slot: "secondary")
                         if !snap.veterans.isEmpty {
-                            tacticPicker("Extra — \(snap.veterans.joined(separator: " / ")) only", slot: "extra")
+                            tacticLink("Extra — \(snap.veterans.joined(separator: " / ")) only", slot: "extra")
                         }
                     }
                 }
 
-                Section("Faction equipment") {
+                Section {
                     ForEach(rules.effects.filter { $0.kind == "equipment" }, id: \.id) { e in
-                        Toggle(e.name, isOn: Binding(get: { snap.equip.contains(e.id) },
-                                                     set: { _ in store.send(Event(.equip, Params(id: e.id))) }))
+                        HStack {
+                            InfoLabel(id: e.id, name: e.name)
+                            Spacer()
+                            Toggle(e.name, isOn: Binding(get: { snap.equip.contains(e.id) },
+                                                         set: { _ in store.send(Event(.equip, Params(id: e.id))) }))
+                                .labelsHidden()
+                        }
                     }
+                } header: { Text("Faction equipment") } footer: { Text("Tap a name to read what it does.") }
+
+                Section {
+                    LabeledContent("Have photos", value: "\(photoCount) of \(rules.operatives.count)")
+                    Button("Import photos…") { importing = true }
+                    if let importResult { Text(importResult).font(.footnote).foregroundStyle(Theme.text2) }
+                } header: { Text("Operative photos") } footer: {
+                    Text("Name each file after its operative (e.g. plague_marine_champion.png). You can also drop them into Kill Team's folder in the Files app; they're picked up when the app opens. To set one photo, tap the portrait on an operative.")
                 }
 
                 Section {
                     LabeledContent("Rules version", value: rules.meta.rulesVersion ?? "unknown")
-                    if let pdf = rules.meta.sourcePdf {
-                        Text(pdf).font(.caption).foregroundStyle(Theme.text2)
-                    }
                 } header: { Text("Rules") } footer: {
-                    Text("From the latest official rules PDF. Anything not yet confirmed is tagged Unverified in the game.")
+                    Text("From the latest official rules. Anything not yet confirmed is tagged Unverified in the game.")
                 }
 
                 Section {
@@ -107,6 +123,12 @@ struct SetupView: View {
                     pendingTeam = nil
                 }
             } message: { Text("The current game will be replaced.") }
+            .fileImporter(isPresented: $importing, allowedContentTypes: [.image], allowsMultipleSelection: true) { result in
+                guard case .success(let urls) = result else { return }
+                let r = store.importPhotos(from: urls)
+                importResult = "Added \(r.matched)." + (r.unmatched.isEmpty ? "" : " Didn't match: " + r.unmatched.joined(separator: ", "))
+            }
+            .ruleInfo(store.engine)
             .confirmationDialog("Reset the whole game?", isPresented: $confirmReset, titleVisibility: .visible) {
                 Button("Reset", role: .destructive) { store.resetGame() }
             }
@@ -120,17 +142,73 @@ struct SetupView: View {
         "\(snap.rosterStatus.total) of 6" + (snap.rosterStatus.leaders == 1 ? "" : " · no leader")
     }
 
-    private func tacticPicker(_ title: String, slot: String) -> some View {
-        Picker(title, selection: Binding(get: { snap.tactics[slot] ?? "" }, set: { new in
-            let current = snap.tactics[slot] ?? ""
-            if new.isEmpty {
-                if !current.isEmpty { store.send(Event(.tactic, Params(id: current, slot: slot))) }
-            } else {
-                store.send(Event(.tactic, Params(id: new, slot: slot)))
-            }
-        })) {
-            Text("None").tag("")
-            ForEach(rules.chapterTactics, id: \.id) { t in Text(t.name).tag(t.id) }
+    private var photoCount: Int { rules.operatives.filter { store.photo(for: $0.id) != nil }.count }
+
+    /// Abilities a leader brings, beyond the faction rule everyone has.
+    private func grants(_ o: Operative) -> String {
+        let own = o.abilities.filter { a in !rules.effects.contains { $0.kind == "faction_rule" && $0.name == a } }
+        return own.isEmpty ? "No extra abilities" : own.joined(separator: " · ")
+    }
+
+    private func tacticLink(_ title: String, slot: String) -> some View {
+        NavigationLink {
+            TacticChooser(slot: slot, title: title).environmentObject(store)
+        } label: {
+            LabeledContent(title, value: rules.chapterTactics.first { $0.id == snap.tactics[slot] }?.name ?? "None")
         }
+    }
+}
+
+/// A rule name in Setup that opens its full text.
+struct InfoLabel: View {
+    let id: String
+    let name: String
+    @Environment(\.showInfo) private var showInfo
+
+    var body: some View {
+        Button { showInfo(.rule(id)) } label: {
+            HStack(spacing: 6) {
+                Text(name).foregroundStyle(Theme.text)
+                Image(systemName: "info.circle").font(.footnote).foregroundStyle(Theme.link)
+            }
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+/// Pick a chapter tactic, reading each one's full rule (terms tappable).
+struct TacticChooser: View {
+    @EnvironmentObject private var store: GameStore
+    @Environment(\.dismiss) private var dismiss
+    let slot: String
+    let title: String
+
+    var body: some View {
+        List {
+            ForEach(store.rules.chapterTactics, id: \.id) { t in
+                let chosen = store.snapshot.tactics[slot] == t.id
+                HStack(alignment: .top, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(t.name).font(.headline)
+                        RuleText(segments: store.engine.segments(t.text, excluding: t.name), font: .footnote)
+                    }
+                    Spacer()
+                    Button {
+                        store.send(Event(.tactic, Params(id: t.id, slot: slot)))
+                        if !chosen { dismiss() }
+                    } label: {
+                        Image(systemName: chosen ? "checkmark.circle.fill" : "circle")
+                            .font(.title3).foregroundStyle(chosen ? Theme.link : Theme.muted)
+                            .frame(width: 44, height: 44)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(chosen ? "Clear \(t.name)" : "Choose \(t.name)")
+                }
+            }
+        }
+        .navigationTitle(title)
+        .scrollContentBackground(.hidden)
+        .background(Theme.bg)
+        .ruleInfo(store.engine)
     }
 }

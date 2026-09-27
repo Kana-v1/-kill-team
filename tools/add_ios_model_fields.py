@@ -71,7 +71,7 @@ PM = {
     "pm.strat.cloud_of_flies": ("defence", T, "A Plague Marine more than 3\" from its shooter and wholly within 1\" of your marker is obscured."),
     "pm.strat.nurglings": ("any", T, "One enemy within 3\" of a Plague Marine (or poisoned within 7\"): −1 APL until its next activation ends."),
     "pm.ff.virulent_poison": ("activation", T, "Before or after an action: an enemy within 3\", or visible and within 7\", gains a Poison token."),
-    "pm.ff.poisonous_demise": ("any", T, "When a Plague Marine is incapacitated: enemies within 3\" gain a Poison token; already-poisoned ones take 1 damage instead."),
+    "pm.ff.poisonous_demise": ("defence", T, "When one of your Plague Marines is incapacitated, before it's removed: enemies within 3\" gain a Poison token; already-poisoned ones take 1 damage instead."),
     "pm.ff.sickening_resilience": ("defence", T, "Until this activation ends, Disgustingly Resilient subtracts 1 automatically (min 2) — no roll."),
     "pm.ff.curse_of_rot": ("attack", T, "After they roll, each 3 deals 1 damage and can't be retained as a success or re-rolled. Enemy within 3\", 7\" if poisoned."),
     "pm.eq.plague_bells": ("any", T, "Ignore injured-stat changes on your Plague Marines (weapons included)."),
@@ -87,6 +87,8 @@ PM = {
     "pm.op.putrescent_vitality": ("activation", S, "1AP Psychic: a friendly operative within 3\" rolls 2D6 — a 7 regains 7 wounds, else the highest D6. Once per turning point; not in enemy control range."),
     "pm.op.flail": ("attack", S, "1AP (counts as Fight): D3+2 damage to each other operative visible and within 2\"; on a D3 of 3, enemies also gain a Poison token. Not on Conceal."),
 }
+# Ploys the app offers at a specific moment it can see (marking an operative down).
+TRIGGERS = {"pm.ff.poisonous_demise": "incapacitated"}
 PM_WEAPON_MATCH = {"pm.eq.plague_rounds": ["boltgun", "bolt pistol"]}
 PM_GRANTS = {
     "pm.strat.lumbering_death": [{"match": ["*"], "rules": ["Ceaseless"],
@@ -122,6 +124,8 @@ def apply(team, table, grants, weapon_match, option_grants=None, tactics=None, g
         e["when"], e["appliesTo"], e["hint"] = when, applies, hint
         if applies == W:
             e["weaponMatch"] = weapon_match[e["id"]]
+        if e["id"] in TRIGGERS:
+            e["trigger"] = TRIGGERS[e["id"]]
         if e["id"] in grants:
             e["grantsWeaponRules"] = grants[e["id"]]
         for o in e.get("options", []):

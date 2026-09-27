@@ -63,11 +63,13 @@ public struct Effect: Codable {
     public var weaponMatch: [String]?
     public var hint: String?
     public var grantsWeaponRules: [Grant]?
+    /// A moment the app itself sees that should offer this ploy ("incapacitated").
+    public var trigger: String?
 
     enum CodingKeys: String, CodingKey {
         case id, name, kind, universal, cost, duration, text, options, requiresOperative, alwaysOn,
              costOverride, costOverrides, changesOptionOf, requires, disputed, verify,
-             when, appliesTo, weaponMatch, hint, grantsWeaponRules
+             when, appliesTo, weaponMatch, hint, grantsWeaponRules, trigger
         case oncePer = "once_per"
     }
 

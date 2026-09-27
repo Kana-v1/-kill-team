@@ -346,9 +346,10 @@
       },
       "source": "official PDF, August '26",
       "once_per": "turning_point",
-      "when": "any",
+      "when": "defence",
       "appliesTo": "team",
-      "hint": "When a Plague Marine is incapacitated: enemies within 3\" gain a Poison token; already-poisoned ones take 1 damage instead."
+      "hint": "When one of your Plague Marines is incapacitated, before it's removed: enemies within 3\" gain a Poison token; already-poisoned ones take 1 damage instead.",
+      "trigger": "incapacitated"
     },
     {
       "id": "pm.ff.sickening_resilience",

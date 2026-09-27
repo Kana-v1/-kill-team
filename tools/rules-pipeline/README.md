@@ -77,3 +77,4 @@ The text layer is extracted without OCR by default (fast, exact). A few values
 are printed as graphics (notably ploy base CP costs) and won't appear in the
 text. To try OCR, run with `LIT_OCR=1 OCR_SERVER=<url>` — `lit`'s OCR needs an
 HTTP OCR server (`--ocr-server-url`).
+

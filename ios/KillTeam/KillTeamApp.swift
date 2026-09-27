@@ -3,6 +3,7 @@ import SwiftUI
 @main
 struct KillTeamApp: App {
     @StateObject private var store = GameStore()
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
         WindowGroup {
@@ -11,6 +12,10 @@ struct KillTeamApp: App {
                 .preferredColorScheme(.dark)
                 .tint(Theme.link)
                 .shakeForLog()
+        }
+        .onChange(of: scenePhase) { _, phase in
+            // Photos dropped into the app's folder (Files app) are picked up on return.
+            if phase == .active { store.importDroppedPhotos() }
         }
     }
 }

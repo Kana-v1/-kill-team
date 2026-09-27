@@ -158,14 +158,17 @@ struct FlowLayout: Layout {
     }
 }
 
-/// Operative mark: the user's own photo when set, else an SF Symbol chosen per
-/// icon key (no GW artwork is ever bundled).
+/// Operative mark: the player's photo when set (on the phone, never bundled),
+/// else an SF Symbol chosen per icon key.
 struct Glyph: View {
     let operative: Operative
+    var photo: UIImage? = nil
     var size: CGFloat = 22
 
     var body: some View {
-        if let photo = operative.photo, let img = Glyph.image(fromDataURI: photo) {
+        if let photo {
+            Image(uiImage: photo).resizable().scaledToFill()
+        } else if let uri = operative.photo, let img = Glyph.image(fromDataURI: uri) {
             Image(uiImage: img).resizable().scaledToFill()
         } else {
             Image(systemName: Glyph.symbol(operative.icon))

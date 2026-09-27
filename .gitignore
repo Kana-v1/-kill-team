@@ -1,10 +1,10 @@
 # Go (legacy web backend): persisted game logs are runtime state
-/backend/games/
+/legacy/web/backend/games/
 *.test
 
 # Node / frontend
-/frontend/node_modules/
-/frontend/dist/
+/legacy/web/frontend/node_modules/
+/legacy/web/frontend/dist/
 npm-debug.log*
 *.tsbuildinfo
 
@@ -28,3 +28,6 @@ __pycache__/
 /ios/build/
 /ios/Payload/
 /ios/build.log
+
+# Personal, never published (e.g. the photo-crop tool)
+/local/

@@ -63,6 +63,54 @@ final class ScenarioTests: XCTestCase {
         XCTAssertEqual(price, ["devastator": 0, "tactical": 0, "assault": 1])
     }
 
+    func testWrathOfVengeanceIsFreeWhenTheCaptainCounteracts() {
+        // Heroic Leader: a firefight ploy for 0CP if the Captain is the specified operative.
+        let e = Repo.engine("aod")
+        let captain = e.derive(e.fold([ev(.phase, Params(phase: .firefight))])).useCard("aod.ff.wrath_of_vengeance")!
+        XCTAssertEqual(captain.cp, 0)
+        let other = e.derive(e.fold([ev(.phase, Params(phase: .firefight)), ev(.op, Params(id: "intercessor_gunner"))]))
+            .useCard("aod.ff.wrath_of_vengeance")!
+        XCTAssertEqual(other.cp, 1)
+        XCTAssertEqual(other.maybe.first?.needsOperative, "Space Marine Captain")
+        // Heroic Leader is once per turning point: after one free ploy, the next costs again.
+        let used = e.fold([ev(.phase, Params(phase: .firefight)), ev(.activate, Params(id: "aod.ff.shock_assault"))])
+        XCTAssertEqual(used.cp, 3, "Shock Assault was free for the Captain")
+        XCTAssertEqual(e.derive(used).useCard("aod.ff.wrath_of_vengeance")?.cp, 1)
+    }
+
+    func testReliquariesMakeWrathFreeOnEngage() {
+        let e = Repo.engine("aod")
+        let s = e.fold([ev(.equip, Params(id: "aod.eq.chapter_reliquaries")), ev(.phase, Params(phase: .firefight)),
+                        ev(.op, Params(id: "intercessor_gunner"))])
+        let wrath = e.derive(s).useCard("aod.ff.wrath_of_vengeance")!
+        XCTAssertEqual(wrath.cp, 0)
+        XCTAssertEqual(wrath.discount?.map(\.t).joined(), "Chapter Reliquaries: the operative has an Engage order")
+    }
+
+    func testCombatDoctrineIsFreeOnlyWithADoctrineWarfareSergeant() {
+        let e = Repo.engine("aod")
+        XCTAssertEqual(e.derive(e.fold([])).useCard("aod.strat.combat_doctrine")?.cheaperOptions.map(\.name), [],
+                       "the Captain gives no free doctrine")
+        let sgt = e.derive(e.fold([ev(.leader, Params(id: "assault_intercessor_sergeant"))])).useCard("aod.strat.combat_doctrine")!
+        XCTAssertEqual(sgt.cheaperOptions.map(\.name), ["Tactical", "Assault"])
+    }
+
+    func testPoisonousDemiseIsOfferedOnIncapacitation() {
+        let e = Repo.engine("plague_marines")
+        let v = e.derive(e.fold([ev(.phase, Params(phase: .firefight))]))
+        XCTAssertEqual(v.use.flatMap(\.cards).filter { $0.trigger == "incapacitated" }.map(\.id), ["pm.ff.poisonous_demise"])
+    }
+
+    func testRuleInfoGivesFullTextForEffectsAndTactics() {
+        let aod = Repo.engine("aod")
+        let cd = aod.ruleInfo("aod.strat.combat_doctrine")!
+        XCTAssertEqual(cd.options.map(\.name), ["Devastator", "Tactical", "Assault"])
+        XCTAssertTrue(cd.body.contains { $0.term == "Balanced" })
+        XCTAssertEqual(cd.version, "August '26")
+        XCTAssertEqual(aod.ruleInfo("tactic.aggressive")?.kind, "Chapter tactic")
+        XCTAssertTrue(aod.ruleInfo("tactic.aggressive")!.body.contains { $0.term == "Rending" })
+    }
+
     func testIconOfContagionDiscountFollowsTheIconBearer() {
         let e = Repo.engine("plague_marines")
         let contagion = e.effect("pm.strat.contagion")!
@@ -98,7 +146,8 @@ final class ScenarioTests: XCTestCase {
         let v = e.derive(e.fold([ev(.phase, Params(phase: .firefight))]))
         let groups = Dictionary(uniqueKeysWithValues: v.use.map { ($0.when, $0.cards.map(\.id)) })
         XCTAssertEqual(groups[.attack], ["pm.ff.curse_of_rot"])
-        XCTAssertEqual(groups[.defence], ["pm.ff.sickening_resilience"])
+        XCTAssertEqual(groups[.defence], ["pm.ff.poisonous_demise", "pm.ff.sickening_resilience"])
+        XCTAssertNil(groups[.any]?.first { $0 == "pm.ff.poisonous_demise" }, "not an any-time ploy")
         XCTAssertEqual(groups[.activation], ["pm.ff.virulent_poison"])
     }
 

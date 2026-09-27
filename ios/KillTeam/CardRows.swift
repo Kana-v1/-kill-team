@@ -1,31 +1,39 @@
 import SwiftUI
 import KTEngine
 
-// MARK: - tappable rule terms
+// MARK: - rule info: tap a term or a rule name to read it
 
-private struct ShowTermKey: EnvironmentKey {
-    static let defaultValue: (String) -> Void = { _ in }
-}
+/// What an info sheet shows: a glossary term, or a rule's full text by id.
+enum InfoRef: Identifiable, Equatable {
+    case term(String)
+    case rule(String)
 
-extension EnvironmentValues {
-    /// Opens a rule term's definition (set by `.ruleTerms(engine)`).
-    var showTerm: (String) -> Void {
-        get { self[ShowTermKey.self] }
-        set { self[ShowTermKey.self] = newValue }
+    var id: String {
+        switch self {
+        case .term(let t): return "term:\(t)"
+        case .rule(let r): return "rule:\(r)"
+        }
     }
 }
 
-struct TermRef: Identifiable {
-    let id: String
+private struct ShowInfoKey: EnvironmentKey {
+    static let defaultValue: (InfoRef) -> Void = { _ in }
 }
 
-/// Rule text whose terms (Ceaseless, Severe, Poison…) are tappable links that
-/// open their definition. Plain runs keep the surrounding text style.
+extension EnvironmentValues {
+    /// Opens a term's definition or a rule's full text (set by `.ruleInfo(engine)`).
+    var showInfo: (InfoRef) -> Void {
+        get { self[ShowInfoKey.self] }
+        set { self[ShowInfoKey.self] = newValue }
+    }
+}
+
+/// Rule text whose terms (Ceaseless, Severe, Poison…) are tappable links.
 struct RuleText: View {
     let segments: [Segment]
     var font: Font = .subheadline
     var color: Color = Theme.text2
-    @Environment(\.showTerm) private var showTerm
+    @Environment(\.showInfo) private var showInfo
 
     var body: some View {
         Text(attributed)
@@ -37,7 +45,7 @@ struct RuleText: View {
                 guard url.scheme == "ktterm",
                       let name = URLComponents(url: url, resolvingAgainstBaseURL: false)?
                         .queryItems?.first(where: { $0.name == "name" })?.value else { return .systemAction }
-                showTerm(name)
+                showInfo(.term(name))
                 return .handled
             })
     }
@@ -60,50 +68,147 @@ struct RuleText: View {
     }
 }
 
-/// Presents rule-term definitions for everything inside it.
-struct RuleTerms: ViewModifier {
+/// A rule's name that opens its full text when tapped.
+struct RuleName: View {
+    let id: String
+    let name: String
+    var font: Font = .headline
+    @Environment(\.showInfo) private var showInfo
+
+    var body: some View {
+        Button { showInfo(.rule(id)) } label: {
+            Text(name).font(font).foregroundStyle(Theme.text).multilineTextAlignment(.leading)
+        }
+        .buttonStyle(.plain)
+        .accessibilityHint("Shows the full rule")
+    }
+}
+
+/// Presents term and rule sheets for everything inside it.
+struct RuleInfoSheets: ViewModifier {
     let engine: Engine
-    @State private var term: TermRef?
+    @State private var ref: InfoRef?
 
     func body(content: Content) -> some View {
         content
-            .environment(\.showTerm, { term = TermRef(id: $0) })
-            .sheet(item: $term) { ref in
-                TermSheet(name: ref.id, entry: engine.definition(ref.id))
-                    .presentationDetents([.height(280), .medium])
+            .environment(\.showInfo, { ref = $0 })
+            .sheet(item: $ref) { r in
+                InfoSheet(engine: engine, start: r)
+                    .presentationDetents([.medium, .large])
             }
     }
 }
 
 extension View {
-    func ruleTerms(_ engine: Engine) -> some View { modifier(RuleTerms(engine: engine)) }
+    func ruleInfo(_ engine: Engine) -> some View { modifier(RuleInfoSheets(engine: engine)) }
 }
 
-struct TermSheet: View {
-    let name: String
-    let entry: GlossaryEntry?
+/// The definition or full rule text. Terms inside it are tappable too; they
+/// open in the same sheet, with Back to return.
+struct InfoSheet: View {
+    let engine: Engine
+    let start: InfoRef
+    @State private var stack: [InfoRef] = []
+
+    private var current: InfoRef { stack.last ?? start }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 10) {
+                if !stack.isEmpty {
+                    Button { stack.removeLast() } label: { Label("Back", systemImage: "chevron.left") }
+                        .font(.subheadline.weight(.semibold)).foregroundStyle(Theme.link)
+                }
+                content
+            }
+            .padding(20)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .background(Theme.raised)
+        .environment(\.showInfo, { stack.append($0) })
+        .preferredColorScheme(.dark)
+    }
+
+    @ViewBuilder private var content: some View {
+        switch current {
+        case .term(let name):
+            let entry = engine.definition(name)
             Text((entry?.kind ?? "rule").uppercased())
                 .font(.caption.weight(.semibold)).tracking(0.5).foregroundStyle(Theme.text2)
             Text(name).font(.title2.bold())
-            Text(entry?.def ?? "No definition recorded for this term.")
-                .font(.body).foregroundStyle(Theme.text)
-                .fixedSize(horizontal: false, vertical: true)
-            Spacer(minLength: 0)
+            RuleText(segments: engine.segments(entry?.def ?? "No definition recorded for this term.", excluding: name),
+                     font: .body, color: Theme.text)
+        case .rule(let id):
+            if let info = engine.ruleInfo(id) {
+                Text(info.kind.uppercased()).font(.caption.weight(.semibold)).tracking(0.5).foregroundStyle(Theme.text2)
+                Text(info.title).font(.title2.bold())
+                RuleText(segments: info.body, font: .body, color: Theme.text)
+                ForEach(Array(info.options.enumerated()), id: \.offset) { _, o in
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(o.name).font(.headline)
+                        RuleText(segments: o.text)
+                    }
+                    .padding(.top, 4)
+                }
+                if let v = info.version {
+                    Text("Official rules, \(v)").font(.footnote).foregroundStyle(Theme.muted).padding(.top, 6)
+                }
+            } else {
+                Text("No rule text recorded.").foregroundStyle(Theme.text2)
+            }
         }
-        .padding(20)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.raised)
-        .preferredColorScheme(.dark)
+    }
+}
+
+// MARK: - foldable blocks
+
+/// A block with a header that folds it away. Remembered per block.
+struct Fold<Content: View>: View {
+    let title: String
+    var trailing: String?
+    var small = false
+    var titleColor: Color = Theme.text
+    @AppStorage private var open: Bool
+    @ViewBuilder var content: Content
+
+    init(_ title: String, key: String, trailing: String? = nil, small: Bool = false, titleColor: Color = Theme.text,
+         @ViewBuilder content: () -> Content) {
+        self.title = title
+        self.trailing = trailing
+        self.small = small
+        self.titleColor = titleColor
+        _open = AppStorage(wrappedValue: true, "fold.\(key)")
+        self.content = content()
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Button {
+                withAnimation(.easeInOut(duration: 0.2)) { open.toggle() }
+            } label: {
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    Text(title).font(small ? .footnote.weight(.semibold) : .title3.bold()).foregroundStyle(titleColor)
+                    Image(systemName: "chevron.down")
+                        .font(.system(size: small ? 10 : 13, weight: .bold))
+                        .foregroundStyle(Theme.muted)
+                        .rotationEffect(.degrees(open ? 0 : -90))
+                    Spacer()
+                    if let trailing { Text(trailing).font(.subheadline).foregroundStyle(Theme.text2) }
+                }
+                .contentShape(Rectangle())
+                .padding(.horizontal, 4)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("\(title), \(open ? "expanded" : "collapsed")")
+            if open { content }
+        }
     }
 }
 
 // MARK: - rows
 
-/// A ploy or piece of equipment you can use now. Tap to pay for it; ones with
-/// options (Combat Doctrine) open their choices first.
+/// A ploy or piece of equipment you can use now. Tap the price to pay for it;
+/// ones with options (Combat Doctrine) open their choices first.
 struct UsableRow: View {
     let card: UsableCard
     let onUse: (String?) -> Void
@@ -111,11 +216,12 @@ struct UsableRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            // The price is the button: rule text stays outside it so its terms stay tappable.
+            // The price is the button: name and rule text stay outside it so
+            // they stay tappable for the full rule and term definitions.
             HStack(alignment: .center, spacing: 12) {
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: 6) {
-                        Text(card.name).font(.headline).foregroundStyle(Theme.text)
+                        RuleName(id: card.id, name: card.name)
                         if card.disputed { Tag(text: "UNVERIFIED", color: Theme.hot) }
                     }
                     RuleText(segments: card.hint)
@@ -136,6 +242,10 @@ struct UsableRow: View {
 
             if let discount = card.discount {
                 RuleText(segments: discount, color: Theme.link)
+            }
+            if !card.cheaperOptions.isEmpty {
+                Text("Free: " + card.cheaperOptions.map(\.name).joined(separator: ", "))
+                    .font(.footnote.weight(.semibold)).foregroundStyle(Theme.go)
             }
             ForEach(Array(card.maybe.enumerated()), id: \.offset) { _, m in
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
@@ -198,7 +308,7 @@ struct ActiveRow: View {
         HStack(alignment: .center, spacing: 10) {
             VStack(alignment: .leading, spacing: 3) {
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
-                    Text(card.name).font(.body.weight(.semibold))
+                    RuleName(id: card.id, name: card.name, font: .body.weight(.semibold))
                     Text(card.life).font(.caption).foregroundStyle(Theme.muted)
                     if card.disputed { Tag(text: "UNVERIFIED", color: Theme.hot) }
                 }

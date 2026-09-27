@@ -56,7 +56,7 @@ struct GameView: View {
                         .presentationDetents([.medium])
                 }
             }
-            .ruleTerms(store.engine)
+            .ruleInfo(store.engine)
         }
     }
 
@@ -118,7 +118,7 @@ struct GameView: View {
             VStack(alignment: .leading, spacing: 6) {
                 Button { showOperative = true } label: {
                     HStack(spacing: 12) {
-                        Glyph(operative: op, size: 24)
+                        Glyph(operative: op, photo: store.photo(for: op.id), size: 24)
                             .frame(width: 44, height: 44)
                             .background(Theme.raised, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
@@ -157,44 +157,44 @@ struct GameView: View {
     }
 
     @ViewBuilder private var useSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            SectionTitle(text: "Use now", trailing: snap.use.isEmpty ? nil : "\(snap.use.reduce(0) { $0 + $1.cards.count })")
+        Fold("Use now", key: "use", trailing: snap.use.isEmpty ? nil : "\(snap.use.reduce(0) { $0 + $1.cards.count })") {
             if snap.use.isEmpty {
                 Text(snap.phase == .strategy ? "No strategy ploys left this turning point." : "Nothing left to use this turning point.")
                     .font(.subheadline).foregroundStyle(Theme.text2).padding(.horizontal, 4)
             }
             ForEach(snap.use, id: \.when) { group in
-                Text(group.when.useTitle).font(.footnote.weight(.semibold)).foregroundStyle(Theme.text2)
-                    .padding(.horizontal, 4).padding(.top, 4)
-                ListBlock {
-                    ForEach(Array(group.cards.enumerated()), id: \.element.id) { i, card in
-                        if i > 0 { Hairline() }
-                        UsableRow(card: card) { opt in
-                            store.send(Event(.activate, Params(id: card.id, opt: opt)))
+                Fold(group.when.useTitle, key: "use.\(group.when.rawValue)", small: true, titleColor: Theme.text2) {
+                    ListBlock {
+                        ForEach(Array(group.cards.enumerated()), id: \.element.id) { i, card in
+                            if i > 0 { Hairline() }
+                            UsableRow(card: card) { opt in
+                                store.send(Event(.activate, Params(id: card.id, opt: opt)))
+                            }
                         }
                     }
                 }
+                .padding(.top, 4)
             }
         }
     }
 
     @ViewBuilder private var activeSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            SectionTitle(text: "Active on \(store.engine.operative(snap.op)?.name ?? "operative")")
+        Fold("Active on \(store.engine.operative(snap.op)?.name ?? "operative")", key: "active") {
             if snap.active.isEmpty {
                 Text("Nothing in play.").font(.subheadline).foregroundStyle(Theme.text2).padding(.horizontal, 4)
             }
             ForEach(snap.active, id: \.when) { group in
-                Text(group.when.title.uppercased()).font(.footnote.weight(.semibold)).foregroundStyle(Theme.live)
-                    .padding(.horizontal, 4).padding(.top, 4)
-                ListBlock {
-                    ForEach(Array(group.cards.enumerated()), id: \.element.id) { i, card in
-                        if i > 0 { Hairline() }
-                        ActiveRow(card: card,
-                                  onEnd: { store.send(Event(.end, Params(id: card.id))) },
-                                  onMarkUsed: { store.send(Event(.useBattle, Params(id: card.id))) })
+                Fold(group.when.title.uppercased(), key: "active.\(group.when.rawValue)", small: true, titleColor: Theme.live) {
+                    ListBlock {
+                        ForEach(Array(group.cards.enumerated()), id: \.element.id) { i, card in
+                            if i > 0 { Hairline() }
+                            ActiveRow(card: card,
+                                      onEnd: { store.send(Event(.end, Params(id: card.id))) },
+                                      onMarkUsed: { store.send(Event(.useBattle, Params(id: card.id))) })
+                        }
                     }
                 }
+                .padding(.top, 4)
             }
             if !snap.elsewhere.isEmpty {
                 Text("On other operatives: " + snap.elsewhere.map(\.name).joined(separator: ", ") + ".")
