@@ -1,0 +1,1050 @@
+{
+  "meta": {
+    "team": "Celestian Insidiants",
+    "teamId": "IMP-CI",
+    "edition": "Kill Team (2024)",
+    "schema": 1,
+    "compiled": "2026-09-27",
+    "sources": [
+      "official: eng_celestian_insidiants_online_rules-lqzptdkmld-qrehe4wai4.pdf"
+    ],
+    "sourcePdf": "eng_celestian_insidiants_online_rules-lqzptdkmld-qrehe4wai4.pdf",
+    "rulesVersion": "August '26",
+    "note": "Transcribed from the official August '26 PDF and checked against the rendered pages. INSPIRING and Benedictions are tracked as operative statuses the player sets.",
+    "composition": "1 Insidiant Superior (relic condemnor stakethrower, relic bolt pistol and null mace; OR inferno pistol and null mace) plus 8 operatives from Abjuror / Censor / Cremator / Denuncia / Mortisanctus / Reliquarius / Warrior. Other than Cremator and Warrior, each once; up to two Cremators.",
+    "rosterSize": 9,
+    "defaultRoster": [
+      "insidiant_superior",
+      "insidiant_abjuror",
+      "insidiant_censor",
+      "insidiant_cremator#1",
+      "insidiant_denuncia",
+      "insidiant_mortisanctus",
+      "insidiant_reliquarius",
+      "insidiant_warrior#1",
+      "insidiant_warrior#2"
+    ],
+    "unresolved": []
+  },
+  "vocab": {
+    "windows": [
+      "strategy_phase",
+      "activation.own",
+      "combat.shoot",
+      "combat.fight",
+      "combat.retaliate",
+      "defence.shooting",
+      "counteract",
+      "any"
+    ],
+    "durations": [
+      "instant",
+      "this_sequence",
+      "this_activation",
+      "this_counteraction",
+      "end_of_turning_point",
+      "battle"
+    ],
+    "triggers": [
+      "turning_point.start",
+      "strategy_phase",
+      "activation.start",
+      "combat.shoot.before_roll",
+      "combat.shoot.after_roll",
+      "combat.fight.before_roll",
+      "combat.fight.after_roll",
+      "combat.retaliate.before_roll",
+      "combat.retaliate.after_roll",
+      "defence.shooting.before_roll",
+      "defence.shooting.after_roll",
+      "counteract.available",
+      "turning_point.end"
+    ],
+    "contexts": [
+      {
+        "id": "strategy_phase",
+        "label": "Strategy"
+      },
+      {
+        "id": "activation.own",
+        "label": "Activating"
+      },
+      {
+        "id": "combat.shoot",
+        "label": "Shooting"
+      },
+      {
+        "id": "combat.fight",
+        "label": "Fighting"
+      },
+      {
+        "id": "combat.retaliate",
+        "label": "Retaliating"
+      },
+      {
+        "id": "defence.shooting",
+        "label": "Defending"
+      },
+      {
+        "id": "counteract",
+        "label": "Counteracting"
+      }
+    ],
+    "phases": [
+      "strategy",
+      "firefight"
+    ],
+    "when": [
+      "activation",
+      "attack",
+      "defence",
+      "any"
+    ],
+    "appliesTo": [
+      "team",
+      "self",
+      "weapons"
+    ]
+  },
+  "statuses": [
+    {
+      "id": "inspiring",
+      "name": "Inspiring",
+      "hint": "Weapons on its datacard have Severe (Inspiration). If it's incapacitated, Martyrdom gives another operative a Benediction.",
+      "grantsWeaponRules": [
+        {
+          "match": [
+            "*"
+          ],
+          "rules": [
+            "Severe"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ardour",
+      "name": "Ardour",
+      "hint": "Benediction: +1 APL until the end of the battle (not the Superior).",
+      "notFor": [
+        "insidiant_superior"
+      ]
+    },
+    {
+      "id": "wrath",
+      "name": "Wrath",
+      "hint": "Benediction: weapons on its datacard have Ceaseless until the end of the battle.",
+      "grantsWeaponRules": [
+        {
+          "match": [
+            "*"
+          ],
+          "rules": [
+            "Ceaseless"
+          ]
+        }
+      ]
+    }
+  ],
+  "effects": [
+    {
+      "id": "core.ff.command_reroll",
+      "name": "Command Re-roll",
+      "kind": "firefight_ploy",
+      "cost": {
+        "cp": 1
+      },
+      "duration": "instant",
+      "text": "After rolling your attack or defence dice, re-roll one of those dice. No limit per turning point.",
+      "universal": true,
+      "windows": [
+        "combat.shoot",
+        "combat.fight",
+        "combat.retaliate",
+        "defence.shooting"
+      ],
+      "source": "official PDF, August '26",
+      "when": "any",
+      "appliesTo": "team",
+      "hint": "After rolling your attack or defence dice, re-roll one of them."
+    },
+    {
+      "id": "ci.rule.inspiration",
+      "name": "Inspiration",
+      "kind": "faction_rule",
+      "cost": {
+        "cp": 0
+      },
+      "duration": "battle",
+      "text": "Whenever a friendly operative incapacitates an enemy operative that has a Wounds stat of 6 or more, or performs the Charge action (before it moves), it becomes INSPIRING. Whenever a friendly operative is INSPIRING, weapons on its datacard have the Severe weapon rule.",
+      "alwaysOn": true,
+      "source": "official PDF, August '26",
+      "when": "any",
+      "appliesTo": "team",
+      "hint": "Kills an enemy with 6+ Wounds, or Charges (before moving)? It becomes INSPIRING — tap its status on the operative sheet."
+    },
+    {
+      "id": "ci.rule.martyrdom",
+      "name": "Martyrdom",
+      "kind": "faction_rule",
+      "cost": {
+        "cp": 0
+      },
+      "duration": "battle",
+      "text": "Whenever an INSPIRING friendly operative is incapacitated, before it's removed from the killzone, select one other friendly operative that operative is visible to or within 6\" of. That selected operative gains one BENEDICTION (incapacitated operatives cannot be selected for a BENEDICTION).",
+      "alwaysOn": true,
+      "source": "official PDF, August '26",
+      "when": "defence",
+      "appliesTo": "team",
+      "hint": "An INSPIRING operative is incapacitated: another friendly operative that it's visible to or within 6\" of gains a BENEDICTION."
+    },
+    {
+      "id": "ci.rule.benedictions",
+      "name": "Benedictions",
+      "kind": "faction_rule",
+      "cost": {
+        "cp": 0
+      },
+      "duration": "battle",
+      "text": "Ardour: until the end of the battle, add 1 to that operative's APL stat (not for a Superior). Wrath: until the end of the battle, weapons on that operative's datacard have the Ceaseless weapon rule. Restoration: that operative regains up to D3+2 lost wounds. Exigence: that operative can immediately perform a free Charge or Dash action (a Charge cannot move more than 3\"), but must end that move closer to that incapacitated INSPIRING operative.",
+      "alwaysOn": true,
+      "source": "official PDF, August '26",
+      "when": "any",
+      "appliesTo": "team",
+      "hint": "Ardour +1 APL (not the Superior) or Wrath: Ceaseless, both all battle; Restoration: regain D3+2 wounds; Exigence: a free Charge (max 3\") or Dash towards the fallen one."
+    },
+    {
+      "id": "ci.rule.weapons_of_the_witch_hunters",
+      "name": "Weapons of the Witch Hunters",
+      "kind": "faction_rule",
+      "cost": {
+        "cp": 0
+      },
+      "duration": "battle",
+      "text": "PSYCHIC ranged weapons cannot inflict damage on friendly operatives. For the effects of PSYCHIC actions, friendly operatives cannot be selected and are never within those actions' required distances. Whenever an operative is within 3\" of a friendly operative: it cannot perform PSYCHIC actions or use PSYCHIC additional rules; it cannot use PSYCHIC ranged weapons; and PSYCHIC melee weapons have no weapon rules and cannot have Dmg stats higher than 3/4.",
+      "alwaysOn": true,
+      "source": "official PDF, August '26",
+      "when": "defence",
+      "appliesTo": "team",
+      "hint": "Enemy PSYCHIC ranged weapons can't damage you. Within 3\" of you: no PSYCHIC actions, rules or ranged weapons; PSYCHIC melee has no rules and Dmg at most 3/4."
+    },
+    {
+      "id": "ci.strat.suspect_and_eliminate",
+      "name": "Suspect & Eliminate",
+      "kind": "strategy_ploy",
+      "cost": {
+        "cp": 1
+      },
+      "duration": "end_of_turning_point",
+      "text": "Select one enemy operative or marker. If an operative, it and each other enemy operative visible to and within 2\" of it gains one of your Suspicion tokens until the end of the turning point; if a marker, each enemy operative contesting it gains one. Whenever a friendly operative is shooting against or fighting against an operative that has one of your Suspicion tokens, its weapons have the Punishing weapon rule.",
+      "once_per": "turning_point",
+      "window": "strategy_phase",
+      "source": "official PDF, August '26",
+      "when": "attack",
+      "appliesTo": "team",
+      "hint": "Enemies with your Suspicion token: your weapons have Punishing against them.",
+      "grantsWeaponRules": [
+        {
+          "match": [
+            "*"
+          ],
+          "rules": [
+            "Punishing"
+          ],
+          "condition": "against an enemy with your Suspicion token"
+        }
+      ]
+    },
+    {
+      "id": "ci.strat.suffering_and_sacrifice",
+      "name": "Suffering & Sacrifice",
+      "kind": "strategy_ploy",
+      "cost": {
+        "cp": 1
+      },
+      "duration": "end_of_turning_point",
+      "text": "Whenever a wounded friendly operative is shooting against, fighting against or retaliating against an enemy operative, its weapons have the Balanced weapon rule.",
+      "once_per": "turning_point",
+      "window": "strategy_phase",
+      "source": "official PDF, August '26",
+      "when": "attack",
+      "appliesTo": "team",
+      "hint": "Wounded operatives have Balanced when shooting, fighting or retaliating.",
+      "grantsWeaponRules": [
+        {
+          "match": [
+            "*"
+          ],
+          "rules": [
+            "Balanced"
+          ],
+          "condition": "if this operative is wounded"
+        }
+      ]
+    },
+    {
+      "id": "ci.strat.wrathful_determination",
+      "name": "Wrathful Determination",
+      "kind": "strategy_ploy",
+      "cost": {
+        "cp": 1
+      },
+      "duration": "end_of_turning_point",
+      "text": "Whenever an operative is shooting a friendly operative that has an Engage order, you can re-roll one of your defence dice.",
+      "once_per": "turning_point",
+      "window": "strategy_phase",
+      "source": "official PDF, August '26",
+      "when": "defence",
+      "appliesTo": "team",
+      "hint": "Shot while on an Engage order: re-roll one defence die."
+    },
+    {
+      "id": "ci.strat.holy_resilience",
+      "name": "Holy Resilience",
+      "kind": "strategy_ploy",
+      "cost": {
+        "cp": 1
+      },
+      "duration": "end_of_turning_point",
+      "text": "Whenever an INSPIRING friendly operative is fighting or retaliating, Normal and Critical Dmg of 4 or more inflicts 1 less damage on that friendly operative.",
+      "once_per": "turning_point",
+      "window": "strategy_phase",
+      "source": "official PDF, August '26",
+      "when": "defence",
+      "appliesTo": "team",
+      "hint": "INSPIRING operatives fighting or retaliating: Dmg of 4 or more deals 1 less to them."
+    },
+    {
+      "id": "ci.ff.glory_to_the_martyrs",
+      "name": "Glory to the Martyrs",
+      "kind": "firefight_ploy",
+      "cost": {
+        "cp": 1
+      },
+      "duration": "instant",
+      "text": "Use when a friendly operative is incapacitated while fighting or retaliating. You can strike the enemy operative in that sequence with one of your unresolved successes before it's removed from the killzone. If that enemy operative is incapacitated as a result, the friendly operative becomes INSPIRING before it's removed and you can resolve the Martyrdom faction rule.",
+      "once_per": "turning_point",
+      "window": "any",
+      "source": "official PDF, August '26",
+      "when": "defence",
+      "appliesTo": "team",
+      "hint": "Incapacitated while fighting or retaliating: strike with one unresolved success first. If that kills, it becomes INSPIRING (Martyrdom).",
+      "trigger": "incapacitated"
+    },
+    {
+      "id": "ci.ff.unshakeable_pursuit",
+      "name": "Unshakeable Pursuit",
+      "kind": "firefight_ploy",
+      "cost": {
+        "cp": 1
+      },
+      "duration": "this_activation",
+      "text": "Use during a friendly operative's activation, before or after it performs an action. Until the end of its activation, ignore any changes to its Move stat; if it's INSPIRING, add 1\" to its Move stat until the end of that activation. If it becomes INSPIRING by performing the Charge action, you can use this ploy before it moves to gain the additional movement.",
+      "once_per": "turning_point",
+      "window": "any",
+      "source": "official PDF, August '26",
+      "when": "activation",
+      "appliesTo": "team",
+      "hint": "Before or after an action: ignore Move changes this activation; INSPIRING also gets +1\" Move."
+    },
+    {
+      "id": "ci.ff.faith_and_fury",
+      "name": "Faith & Fury",
+      "kind": "firefight_ploy",
+      "cost": {
+        "cp": 1
+      },
+      "duration": "instant",
+      "text": "Use when a friendly operative is fighting and you strike the enemy operative in that sequence with a critical success. After resolving that strike, also inflict D3 damage on each other enemy operative visible to and within 2\" of that friendly operative (roll separately for each). The friendly operative becomes INSPIRING if this incapacitates an enemy with a Wounds stat of 6 or more.",
+      "once_per": "turning_point",
+      "window": "any",
+      "source": "official PDF, August '26",
+      "when": "attack",
+      "appliesTo": "team",
+      "hint": "Fighting, you strike with a critical: after it, D3 damage to each other enemy visible and within 2\"."
+    },
+    {
+      "id": "ci.ff.fervent_hate",
+      "name": "Fervent Hate",
+      "kind": "firefight_ploy",
+      "cost": {
+        "cp": 1
+      },
+      "duration": "instant",
+      "text": "Use after rolling your attack dice for a friendly operative shooting against, fighting against or retaliating against an enemy operative that doesn't have the IMPERIUM keyword. Its weapons have the Ceaseless weapon rule until the end of that sequence; if that enemy also has the CHAOS and/or PSYKER keyword, they have the Relentless weapon rule instead.",
+      "once_per": "turning_point",
+      "window": "any",
+      "source": "official PDF, August '26",
+      "when": "attack",
+      "appliesTo": "team",
+      "hint": "After rolling attack dice against a non-IMPERIUM enemy: Ceaseless this sequence (Relentless if it's CHAOS or PSYKER)."
+    },
+    {
+      "id": "ci.eq.psyk_out_grenades",
+      "name": "Psyk-out Grenades",
+      "kind": "equipment",
+      "cost": {
+        "cp": 0
+      },
+      "duration": "battle",
+      "text": "Select two utility grenades from the universal equipment; they must be stun grenades (if you also take that equipment as normal, you cannot select any stun grenades). Whenever an operative takes a stun test from a friendly operative's Stun Grenade action, if the result is a 3+, also inflict damage on it equal to the dice result halved (rounding up); if it has the PSYKER keyword, inflict damage equal to the dice result instead.",
+      "alwaysOn": true,
+      "source": "official PDF, August '26",
+      "when": "attack",
+      "appliesTo": "team",
+      "hint": "Two stun grenades. A stun test of 3+ also deals half the roll (rounded up); full roll against a PSYKER."
+    },
+    {
+      "id": "ci.eq.saintly_relics",
+      "name": "Saintly Relics",
+      "kind": "equipment",
+      "cost": {
+        "cp": 0
+      },
+      "duration": "battle",
+      "text": "Whenever an attack dice would inflict damage on a friendly operative, you can use this rule: roll one D6, or two D6 if that operative is INSPIRING; if any result is a 6, ignore the damage from that attack dice. You cannot ignore more than one attack dice per action and two attack dice per battle this way.",
+      "alwaysOn": true,
+      "source": "official PDF, August '26",
+      "when": "defence",
+      "appliesTo": "team",
+      "hint": "An attack die would damage you: roll a D6 (two if INSPIRING); on a 6 ignore it. Once per action, twice per battle."
+    },
+    {
+      "id": "ci.eq.vocifera_mortis",
+      "name": "Vocifera Mortis",
+      "kind": "equipment",
+      "cost": {
+        "cp": 0
+      },
+      "duration": "battle",
+      "text": "Once per battle, when an INSPIRING friendly operative is incapacitated, you can use this rule: for the Martyrdom faction rule, the other friendly operative you select can be one that isn't visible to or within 6\" of that operative.",
+      "alwaysOn": true,
+      "once_per": "battle",
+      "source": "official PDF, August '26",
+      "when": "defence",
+      "appliesTo": "team",
+      "hint": "Once per battle, Martyrdom: the operative gaining the BENEDICTION can be anywhere."
+    },
+    {
+      "id": "ci.eq.auto_flagellator",
+      "name": "Auto-flagellator",
+      "kind": "equipment",
+      "cost": {
+        "cp": 0
+      },
+      "duration": "battle",
+      "text": "Whenever a friendly operative is activated, you can use this rule: roll one D6 and inflict damage on that operative equal to half the result (rounding up); on a 4+, it also becomes INSPIRING. You cannot make more than one friendly operative INSPIRING this way per turning point.",
+      "alwaysOn": true,
+      "source": "official PDF, August '26",
+      "when": "activation",
+      "appliesTo": "team",
+      "hint": "On activation: roll a D6, take half (rounded up); on 4+ it becomes INSPIRING. Once per turning point."
+    },
+    {
+      "id": "ci.op.holy_example",
+      "name": "Holy Example",
+      "kind": "operative_ability",
+      "cost": {
+        "cp": 0
+      },
+      "duration": "battle",
+      "text": "Once per turning point, if this operative is INSPIRING, you can use a firefight ploy for 0CP if this is the specified operative (including Command Re-roll if the attack or defence dice was rolled for this operative).",
+      "alwaysOn": true,
+      "requiresOperative": "insidiant_superior",
+      "costOverrides": [
+        {
+          "kind": "firefight_ploy",
+          "cp": 0,
+          "once_per": "turning_point",
+          "group": "holy_example",
+          "selectedIs": "insidiant_superior",
+          "requiresStatus": "inspiring",
+          "condition": "the INSPIRING Superior is the operative this ploy specifies · once per turning point"
+        }
+      ],
+      "source": "official PDF, August '26",
+      "when": "any",
+      "appliesTo": "self",
+      "hint": "Once per turning point while INSPIRING: a firefight ploy for the Superior is free (Command Re-roll too)."
+    },
+    {
+      "id": "ci.op.spiritual_mentor",
+      "name": "Spiritual Mentor",
+      "kind": "operative_ability",
+      "cost": {
+        "cp": 0
+      },
+      "duration": "battle",
+      "text": "SUPPORT action (1AP): select one friendly operative visible to and within 6\" of this operative; it becomes INSPIRING. Not while within control range of an enemy operative, or more than once per turning point.",
+      "alwaysOn": true,
+      "requiresOperative": "insidiant_superior",
+      "source": "official PDF, August '26",
+      "when": "activation",
+      "appliesTo": "self",
+      "hint": "1AP: a friendly operative visible and within 6\" becomes INSPIRING. Once per turning point; not in enemy control range."
+    },
+    {
+      "id": "ci.op.holy_defender",
+      "name": "Holy Defender",
+      "kind": "operative_ability",
+      "cost": {
+        "cp": 0
+      },
+      "duration": "battle",
+      "text": "Once per turning point, when a friendly operative visible to and within 2\" of this operative is selected as the valid target of a Shoot action or to fight against during the Fight action, this operative becomes the valid target or is fought against instead (even if it wouldn't normally be valid). For the Fight action, treat it as within the fighting operative's control range for that action; for the Shoot action it's only in cover or obscured if the original target was. No effect against Blast or Torrent ranged weapons.",
+      "alwaysOn": true,
+      "requiresOperative": "insidiant_abjuror",
+      "source": "official PDF, August '26",
+      "when": "defence",
+      "appliesTo": "self",
+      "hint": "Once per turning point: a friend within 2\" is shot or fought — the Abjuror takes it instead (not Blast or Torrent)."
+    },
+    {
+      "id": "ci.op.censor_icon_bearer",
+      "name": "Virge of Admonition Icon Bearer",
+      "kind": "operative_ability",
+      "cost": {
+        "cp": 0
+      },
+      "duration": "battle",
+      "text": "Whenever determining control of a marker, treat this operative's APL stat as 1 higher (not a change to its APL stat, so it's cumulative with any changes).",
+      "alwaysOn": true,
+      "requiresOperative": "insidiant_censor",
+      "source": "official PDF, August '26",
+      "when": "any",
+      "appliesTo": "self",
+      "hint": "Counts as 1 higher APL when determining marker control."
+    },
+    {
+      "id": "ci.op.null_field",
+      "name": "Null Field",
+      "kind": "operative_ability",
+      "cost": {
+        "cp": 0
+      },
+      "duration": "battle",
+      "text": "This operative starts the battle with a null range of 1\". Whenever an enemy operative is within null range of this operative, subtract 2\" from its Move stat and worsen the Hit stat of its weapons by 1 (not cumulative with being injured).",
+      "alwaysOn": true,
+      "requiresOperative": "insidiant_censor",
+      "source": "official PDF, August '26",
+      "when": "defence",
+      "appliesTo": "self",
+      "hint": "Enemies in its null range: −2\" Move and −1 Hit."
+    },
+    {
+      "id": "ci.op.nullifying_ritual",
+      "name": "Nullifying Ritual",
+      "kind": "operative_ability",
+      "cost": {
+        "cp": 0
+      },
+      "duration": "battle",
+      "text": "Action (1AP): add 1 to this operative's null range (to a maximum of 5\"). Not while within control range of an enemy operative, or more than once per turning point.",
+      "alwaysOn": true,
+      "requiresOperative": "insidiant_censor",
+      "source": "official PDF, August '26",
+      "when": "activation",
+      "appliesTo": "self",
+      "hint": "1AP: null range +1\" (max 5\"). Once per turning point; not in enemy control range."
+    },
+    {
+      "id": "ci.op.inspirational_pyre",
+      "name": "Inspirational Pyre",
+      "kind": "operative_ability",
+      "cost": {
+        "cp": 0
+      },
+      "duration": "battle",
+      "text": "Once per turning point, when this operative inflicts damage on an enemy operative with either hand flamer profile but doesn't incapacitate it, you can select one friendly operative within 6\" of this operative to become INSPIRING. (Torrent 0\" means you cannot select secondary targets, but the weapon still has Torrent for other rules.)",
+      "alwaysOn": true,
+      "requiresOperative": "insidiant_cremator",
+      "source": "official PDF, August '26",
+      "when": "attack",
+      "appliesTo": "self",
+      "hint": "Once per turning point: the hand flamer damages but doesn't kill → a friend within 6\" becomes INSPIRING."
+    },
+    {
+      "id": "ci.op.accusing_exorcist",
+      "name": "Accusing Exorcist",
+      "kind": "operative_ability",
+      "cost": {
+        "cp": 0
+      },
+      "duration": "battle",
+      "text": "Whenever this operative is INSPIRING, the Suspect & Eliminate strategy ploy costs you 0CP if the enemy operative or marker you select is visible to or within 6\" of this operative.",
+      "alwaysOn": true,
+      "requiresOperative": "insidiant_denuncia",
+      "costOverrides": [
+        {
+          "effect": "ci.strat.suspect_and_eliminate",
+          "cp": 0,
+          "requiresStatus": "inspiring",
+          "condition": "the INSPIRING Denuncia can see, or is within 6\" of, what you select"
+        }
+      ],
+      "source": "official PDF, August '26",
+      "when": "any",
+      "appliesTo": "self",
+      "hint": "While INSPIRING: Suspect & Eliminate is free if the Denuncia can see, or is within 6\" of, your pick."
+    },
+    {
+      "id": "ci.op.speak_of_her_deeds",
+      "name": "Speak of Her Deeds",
+      "kind": "operative_ability",
+      "cost": {
+        "cp": 0
+      },
+      "duration": "battle",
+      "text": "SUPPORT action (1AP): select an INSPIRING friendly operative visible to and within 6\" of this operative; it's no longer INSPIRING. Then select another friendly operative visible to and within 6\" of this operative and resolve one BENEDICTION from the Martyrdom faction rule on it (excluding Exigence). Not while within control range of an enemy operative.",
+      "alwaysOn": true,
+      "requiresOperative": "insidiant_denuncia",
+      "source": "official PDF, August '26",
+      "when": "activation",
+      "appliesTo": "self",
+      "hint": "1AP: an INSPIRING friend within 6\" stops being INSPIRING; another gets a BENEDICTION (not Exigence)."
+    },
+    {
+      "id": "ci.op.zealous_ultimatum",
+      "name": "Zealous Ultimatum",
+      "kind": "operative_ability",
+      "cost": {
+        "cp": 0
+      },
+      "duration": "battle",
+      "text": "Once per battle STRATEGIC GAMBIT: select one enemy operative within 8\" of this operative and issue an ultimatum. If accepted, whenever this operative is fighting or retaliating against that enemy, add 1 to its blessed broadsword's Atk; the first time it incapacitates that enemy while fighting or retaliating, add 1 to that Atk until the end of the battle (maximum 5). If declined, whenever that enemy is fighting or retaliating against a friendly operative, subtract 1 from the Atk of its weapons. (A non-player operative accepts on a D6 roll of 4+.)",
+      "alwaysOn": true,
+      "once_per": "battle",
+      "requiresOperative": "insidiant_mortisanctus",
+      "source": "official PDF, August '26",
+      "when": "any",
+      "appliesTo": "self",
+      "hint": "Once per battle, Strategic gambit: challenge an enemy within 8\". Accepted: +1 Atk against it. Declined: it gets −1 Atk against you."
+    },
+    {
+      "id": "ci.op.bladed_stance",
+      "name": "Bladed Stance",
+      "kind": "operative_ability",
+      "cost": {
+        "cp": 0
+      },
+      "duration": "battle",
+      "text": "Whenever this operative is fighting or retaliating, you can resolve one of your successes before the normal order. If you do, that success must be used to block.",
+      "alwaysOn": true,
+      "requiresOperative": "insidiant_mortisanctus",
+      "source": "official PDF, August '26",
+      "when": "attack",
+      "appliesTo": "self",
+      "hint": "Fighting or retaliating: resolve one success early — it must block."
+    },
+    {
+      "id": "ci.op.reliquarius_icon_bearer",
+      "name": "Simulacrum Nullificatus Icon Bearer",
+      "kind": "operative_ability",
+      "cost": {
+        "cp": 0
+      },
+      "duration": "battle",
+      "text": "Whenever determining control of a marker, treat the total APL stat of enemy operatives that contest it as 1 lower if at least one of those enemy operatives is within 3\" of this operative (not a change to the APL stat).",
+      "alwaysOn": true,
+      "requiresOperative": "insidiant_reliquarius",
+      "source": "official PDF, August '26",
+      "when": "any",
+      "appliesTo": "self",
+      "hint": "Enemies contesting a marker within 3\" of it count as 1 lower total APL."
+    },
+    {
+      "id": "ci.op.devotion",
+      "name": "Devotion",
+      "kind": "operative_ability",
+      "cost": {
+        "cp": 0
+      },
+      "duration": "battle",
+      "text": "At the end of each of this operative's activations, if it's INSPIRING and it controls an objective marker or one of your mission markers, one friendly operative this operative is visible to and within 6\" of becomes INSPIRING.",
+      "alwaysOn": true,
+      "requiresOperative": "insidiant_reliquarius",
+      "source": "official PDF, August '26",
+      "when": "activation",
+      "appliesTo": "self",
+      "hint": "End of activation, INSPIRING and holding a marker: a friend within 6\" becomes INSPIRING."
+    },
+    {
+      "id": "ci.op.inspired_strikes",
+      "name": "Inspired Strikes",
+      "kind": "operative_ability",
+      "cost": {
+        "cp": 0
+      },
+      "duration": "battle",
+      "text": "Whenever this operative is INSPIRING, add 1 to the Critical Dmg stat of weapons on its datacard.",
+      "alwaysOn": true,
+      "requiresOperative": "insidiant_warrior",
+      "requiresStatus": "inspiring",
+      "source": "official PDF, August '26",
+      "when": "attack",
+      "appliesTo": "self",
+      "hint": "While INSPIRING: +1 Critical Dmg on its weapons."
+    }
+  ],
+  "operatives": [
+    {
+      "id": "insidiant_superior",
+      "name": "Insidiant Superior",
+      "stats": {
+        "apl": 3,
+        "move": "6\"",
+        "save": "3+",
+        "wounds": 10
+      },
+      "abilities": [
+        "Holy Example",
+        "Spiritual Mentor (1AP)"
+      ],
+      "weapons": [
+        {
+          "name": "Inferno pistol",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "4/2",
+          "rules": "Range 3\", Devastating 3, Piercing 2"
+        },
+        {
+          "name": "Relic bolt pistol",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "3/5",
+          "rules": "Range 8\", Lethal 5+"
+        },
+        {
+          "name": "Relic condemnor stakethrower",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "2/2",
+          "rules": "Devastating 2, Lethal 5+, Piercing Crits 1, Silent, Anti-PSYKER"
+        },
+        {
+          "name": "Null mace",
+          "type": "melee",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "4/4",
+          "rules": "Shock, Anti-PSYKER"
+        }
+      ],
+      "icon": "laurel",
+      "accent": "#E8C27A",
+      "photo": null,
+      "leader": true,
+      "multiple": false,
+      "role": "Leader",
+      "chapterVeteran": false
+    },
+    {
+      "id": "insidiant_abjuror",
+      "name": "Insidiant Abjuror",
+      "stats": {
+        "apl": 2,
+        "move": "6\"",
+        "save": "2+",
+        "wounds": 11
+      },
+      "abilities": [
+        "Holy Defender"
+      ],
+      "weapons": [
+        {
+          "name": "Blessed sword & praesidium protectiva (defensive)",
+          "type": "melee",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "4/6",
+          "rules": "Shield"
+        },
+        {
+          "name": "Blessed sword & praesidium protectiva (offensive)",
+          "type": "melee",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "4/6",
+          "rules": "Lethal 5+"
+        }
+      ],
+      "icon": "chevron2",
+      "accent": "#E8C27A",
+      "photo": null,
+      "leader": false,
+      "multiple": false,
+      "role": "Abjuror",
+      "chapterVeteran": false
+    },
+    {
+      "id": "insidiant_censor",
+      "name": "Insidiant Censor",
+      "stats": {
+        "apl": 2,
+        "move": "6\"",
+        "save": "3+",
+        "wounds": 9
+      },
+      "abilities": [
+        "Virge of Admonition Icon Bearer",
+        "Null Field",
+        "Nullifying Ritual (1AP)"
+      ],
+      "weapons": [
+        {
+          "name": "Virge of admonition",
+          "type": "melee",
+          "atk": 4,
+          "hit": "4+",
+          "dmg": "5/5",
+          "rules": "Brutal, Shock, Anti-PSYKER"
+        }
+      ],
+      "icon": "crosshair",
+      "accent": "#E8C27A",
+      "photo": null,
+      "leader": false,
+      "multiple": false,
+      "role": "Censor",
+      "chapterVeteran": false
+    },
+    {
+      "id": "insidiant_cremator",
+      "name": "Insidiant Cremator",
+      "stats": {
+        "apl": 2,
+        "move": "6\"",
+        "save": "3+",
+        "wounds": 9
+      },
+      "abilities": [
+        "Inspirational Pyre"
+      ],
+      "weapons": [
+        {
+          "name": "Hand flamer (standard)",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "2+",
+          "dmg": "3/3",
+          "rules": "Range 6\", Saturate, Torrent 1\""
+        },
+        {
+          "name": "Hand flamer (deluge)",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "2+",
+          "dmg": "3/3",
+          "rules": "Range 4\", Saturate, Seek Light, Torrent 0\""
+        },
+        {
+          "name": "Null mace",
+          "type": "melee",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "4/4",
+          "rules": "Shock, Anti-PSYKER"
+        }
+      ],
+      "icon": "launcher",
+      "accent": "#E8C27A",
+      "photo": null,
+      "leader": false,
+      "multiple": true,
+      "role": "Cremator",
+      "chapterVeteran": false,
+      "max": 2
+    },
+    {
+      "id": "insidiant_denuncia",
+      "name": "Insidiant Denuncia",
+      "stats": {
+        "apl": 2,
+        "move": "6\"",
+        "save": "3+",
+        "wounds": 9
+      },
+      "abilities": [
+        "Accusing Exorcist",
+        "Speak of Her Deeds (1AP)"
+      ],
+      "weapons": [
+        {
+          "name": "Voice of condemnation",
+          "type": "ranged",
+          "atk": 5,
+          "hit": "3+",
+          "dmg": "1/1",
+          "rules": "Range 6\", Seek, Stun"
+        },
+        {
+          "name": "Staff of declamation",
+          "type": "melee",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "3/3",
+          "rules": "Shock"
+        }
+      ],
+      "icon": "rifle",
+      "accent": "#E8C27A",
+      "photo": null,
+      "leader": false,
+      "multiple": false,
+      "role": "Denuncia",
+      "chapterVeteran": false
+    },
+    {
+      "id": "insidiant_mortisanctus",
+      "name": "Insidiant Mortisanctus",
+      "stats": {
+        "apl": 2,
+        "move": "6\"",
+        "save": "3+",
+        "wounds": 9
+      },
+      "abilities": [
+        "Zealous Ultimatum",
+        "Bladed Stance"
+      ],
+      "weapons": [
+        {
+          "name": "Blessed broadsword",
+          "type": "melee",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "4/6",
+          "rules": "Lethal 5+, Brutal"
+        }
+      ],
+      "icon": "chainsword",
+      "accent": "#E8C27A",
+      "photo": null,
+      "leader": false,
+      "multiple": false,
+      "role": "Mortisanctus",
+      "chapterVeteran": false
+    },
+    {
+      "id": "insidiant_reliquarius",
+      "name": "Insidiant Reliquarius",
+      "stats": {
+        "apl": 2,
+        "move": "6\"",
+        "save": "3+",
+        "wounds": 9
+      },
+      "abilities": [
+        "Simulacrum Nullificatus Icon Bearer",
+        "Devotion"
+      ],
+      "weapons": [
+        {
+          "name": "Bolt pistol",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "3/4",
+          "rules": "Range 8\""
+        },
+        {
+          "name": "Condemnor stakethrower",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "2/2",
+          "rules": "Devastating 1, Piercing Crits 1, Silent, Anti-PSYKER"
+        },
+        {
+          "name": "Gun butt",
+          "type": "melee",
+          "atk": 3,
+          "hit": "3+",
+          "dmg": "2/3",
+          "rules": "-"
+        }
+      ],
+      "icon": "chevron2",
+      "accent": "#E8C27A",
+      "photo": null,
+      "leader": false,
+      "multiple": false,
+      "role": "Reliquarius",
+      "chapterVeteran": false
+    },
+    {
+      "id": "insidiant_warrior",
+      "name": "Insidiant Warrior",
+      "stats": {
+        "apl": 2,
+        "move": "6\"",
+        "save": "3+",
+        "wounds": 9
+      },
+      "abilities": [
+        "Inspired Strikes"
+      ],
+      "weapons": [
+        {
+          "name": "Bolt pistol",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "3/4",
+          "rules": "Range 8\""
+        },
+        {
+          "name": "Condemnor stakethrower",
+          "type": "ranged",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "2/2",
+          "rules": "Devastating 1, Piercing Crits 1, Silent, Anti-PSYKER"
+        },
+        {
+          "name": "Null mace",
+          "type": "melee",
+          "atk": 4,
+          "hit": "3+",
+          "dmg": "4/4",
+          "rules": "Shock, Anti-PSYKER"
+        }
+      ],
+      "icon": "rifle",
+      "accent": "#E8C27A",
+      "photo": null,
+      "leader": false,
+      "multiple": true,
+      "role": "Warrior",
+      "chapterVeteran": false
+    }
+  ],
+  "universalEquipment": [],
+  "chapterTactics": [],
+  "glossary": {
+    "INSPIRING": {
+      "kind": "status · Celestian Insidiants",
+      "def": "An operative becomes INSPIRING when it incapacitates an enemy with a Wounds stat of 6 or more, when it performs the Charge action (before it moves), or through rules like Spiritual Mentor. While INSPIRING, weapons on its datacard have Severe; if it's incapacitated, Martyrdom gives another friendly operative a BENEDICTION."
+    },
+    "BENEDICTION": {
+      "kind": "faction rule · Celestian Insidiants",
+      "def": "Gained through Martyrdom. Ardour: +1 APL for the battle (not a Superior). Wrath: weapons on its datacard have Ceaseless for the battle. Restoration: regain up to D3+2 lost wounds. Exigence: a free Charge (max 3\") or Dash, ending closer to the incapacitated INSPIRING operative."
+    },
+    "Anti-PSYKER": {
+      "kind": "weapon rule · Celestian Insidiants",
+      "def": "Whenever this weapon is being used against an operative that has the PSYKER keyword, it has the Lethal 5+ weapon rule."
+    },
+    "Shield": {
+      "kind": "weapon rule · Celestian Insidiants",
+      "def": "Whenever this operative is fighting or retaliating with this weapon profile, each of your blocks can be allocated to block two unresolved successes (instead of one)."
+    },
+    "Suspicion token": {
+      "kind": "token · Celestian Insidiants",
+      "def": "From Suspect & Eliminate, until the end of the turning point. Whenever a friendly operative is shooting against or fighting against an operative with one of your Suspicion tokens, its weapons have Punishing."
+    }
+  }
+}

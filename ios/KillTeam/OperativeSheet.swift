@@ -11,6 +11,7 @@ struct OperativeSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var pickedItem: PhotosPickerItem?
     @State private var pickingFile = false
+    @State private var takingPhoto = false
     /// Ploys to offer the moment an operative is marked incapacitated (Poisonous Demise).
     @State private var deathOffer: UsableCard?
 
@@ -24,6 +25,7 @@ struct OperativeSheet: View {
                     if let op = store.engine.operative(snap.op) {
                         identity(op)
                         stats(op)
+                        if !snap.statuses.isEmpty { statuses }
                         weapons(op)
                         applies
                         Button {
@@ -67,6 +69,10 @@ struct OperativeSheet: View {
                     pickedItem = nil
                 }
             }
+            .fullScreenCover(isPresented: $takingPhoto) {
+                let id = typeOf(snap.op)
+                CameraPicker { img in store.setPhoto(img, for: id) }.ignoresSafeArea()
+            }
             .fileImporter(isPresented: $pickingFile, allowedContentTypes: [.image]) { result in
                 guard case .success(let url) = result else { return }
                 let scoped = url.startAccessingSecurityScopedResource()
@@ -92,6 +98,10 @@ struct OperativeSheet: View {
                         Text(shortName(inst))
                             .font(.subheadline.weight(.semibold))
                             .strikethrough(down)
+                        if !(snap.statusNames[inst] ?? []).isEmpty {
+                            Image(systemName: "sparkles").font(.caption.weight(.bold))
+                                .accessibilityLabel((snap.statusNames[inst] ?? []).joined(separator: ", "))
+                        }
                     }
                     .padding(.leading, store.engine.operative(inst).flatMap { store.photo(for: $0.id) } == nil ? 12 : 5)
                     .padding(.trailing, 12).frame(minHeight: 34)
@@ -106,6 +116,9 @@ struct OperativeSheet: View {
     private func identity(_ op: Operative) -> some View {
         HStack(spacing: 14) {
             Menu {
+                if CameraPicker.isAvailable {
+                    Button { takingPhoto = true } label: { Label("Take Photo", systemImage: "camera") }
+                }
                 PhotosPicker(selection: $pickedItem, matching: .images) {
                     Label("Choose from Photos", systemImage: "photo.on.rectangle")
                 }
@@ -130,6 +143,27 @@ struct OperativeSheet: View {
                 Text(op.name).font(.title2.bold())
                 Text(op.role + (snap.dead.contains(snap.op) ? " · incapacitated" : ""))
                     .font(.subheadline).foregroundStyle(Theme.text2)
+            }
+        }
+    }
+
+    /// Statuses the player sets (INSPIRING, Benedictions): the app can't see them happen.
+    private var statuses: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            SectionTitle(text: "Status", trailing: "tap to set or clear")
+            FlowLayout(spacing: 8) {
+                ForEach(snap.statuses, id: \.id) { st in
+                    Button {
+                        store.send(Event(.status, Params(id: snap.op, opt: st.id)))
+                    } label: {
+                        Label(st.name, systemImage: st.on ? "sparkles" : "circle.dashed")
+                            .font(.subheadline.weight(.semibold))
+                            .padding(.horizontal, 12).frame(minHeight: 34)
+                            .foregroundStyle(st.on ? Color.black : Theme.text)
+                            .background(st.on ? Theme.accent(store.game.team) : Theme.raised, in: Capsule())
+                    }
+                    .accessibilityAddTraits(st.on ? .isSelected : [])
+                }
             }
         }
     }
@@ -207,11 +241,17 @@ struct OperativeSheet: View {
                 let cards = snap.active.flatMap(\.cards)
                 ForEach(Array(cards.enumerated()), id: \.offset) { i, c in
                     if i > 0 { Hairline() }
-                    HStack(spacing: 12) {
+                    HStack(alignment: .firstTextBaseline, spacing: 12) {
                         Image(systemName: "checkmark").font(.footnote.weight(.bold)).foregroundStyle(Theme.go)
-                        Text(c.name).font(.body)
-                        Spacer()
-                        Text(c.kindLabel.components(separatedBy: " · ").first ?? "").font(.footnote).foregroundStyle(Theme.text2)
+                        VStack(alignment: .leading, spacing: 3) {
+                            HStack(alignment: .firstTextBaseline) {
+                                RuleName(id: c.id, name: c.name, font: .body)
+                                Spacer(minLength: 6)
+                                Text(c.kindLabel.components(separatedBy: " · ").first ?? "")
+                                    .font(.footnote).foregroundStyle(Theme.text2)
+                            }
+                            RuleText(segments: c.hint, font: .footnote)
+                        }
                     }
                     .padding(.horizontal, 14).padding(.vertical, 11)
                 }
@@ -233,7 +273,8 @@ struct OperativeSheet: View {
         var n = op.name
         for (long, short) in [("Assault Intercessor", "Asslt Int"), ("Heavy Intercessor", "Hvy Int"),
                               ("Intercessor", "Int"), ("Eliminator", "Elim"), ("Space Marine", "SM"),
-                              ("Malignant Plaguecaster", "Plaguecaster"), ("Plague Marine ", "")] {
+                              ("Malignant Plaguecaster", "Plaguecaster"), ("Plague Marine ", ""),
+                              ("Insidiant ", "")] {
             n = n.replacingOccurrences(of: long, with: short)
         }
         let same = snap.roster.filter { typeOf($0) == typeOf(inst) }.count

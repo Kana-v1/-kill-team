@@ -33,8 +33,13 @@ struct GameView: View {
             .navigationTitle(snap.phase == .strategy ? "Strategy" : "Firefight")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Text(store.rules.meta.team.uppercased())
-                        .font(.footnote.weight(.semibold)).foregroundStyle(accent)
+                    HStack(spacing: 6) {
+                        if let symbol = store.teamSymbol(for: store.game.team) {
+                            Image(uiImage: symbol).resizable().scaledToFit().frame(width: 22, height: 22)
+                        }
+                        Text(store.rules.meta.team.uppercased())
+                            .font(.footnote.weight(.semibold)).foregroundStyle(accent)
+                    }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { showSetup = true } label: { Image(systemName: "slider.horizontal.3") }
@@ -126,6 +131,10 @@ struct GameView: View {
                             Text("Acting").font(.footnote.weight(.semibold)).foregroundStyle(Theme.text2)
                             Text(op.name + (snap.dead.contains(snap.op) ? " · down" : ""))
                                 .font(.headline).foregroundStyle(Theme.text)
+                            if let names = snap.statusNames[snap.op], !names.isEmpty {
+                                Label(names.joined(separator: " · "), systemImage: "sparkles")
+                                    .font(.footnote.weight(.semibold)).foregroundStyle(accent)
+                            }
                             Text("APL \(op.stats.apl) · Move \(op.stats.move) · Save \(op.stats.save) · \(op.stats.wounds) W")
                                 .font(.footnote.monospacedDigit()).foregroundStyle(Theme.text2)
                         }

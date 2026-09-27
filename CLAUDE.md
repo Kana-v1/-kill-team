@@ -7,7 +7,7 @@ mid-game: **"what can I use right now?"** It shows:
 - the rules those effects add to its weapons
 - the acting operative's datacard
 
-Teams: Angels of Death and Plague Marines. The user is a casual player: fewer taps beat rules precision.
+Teams: Angels of Death, Plague Marines and Celestian Insidiants. The user is a casual player: fewer taps beat rules precision.
 
 ## Scope: read this before adding features
 
@@ -24,9 +24,10 @@ The app must never model:
 
 **Rule text states conditions; it never asserts them.** The app can't see the killzone. So write
 "Balanced if the target is more than 6\" away", not "you have Balanced".
-- The exception is a condition the app genuinely knows because the player told it. Two exist today:
+- The exception is a condition the app genuinely knows because the player told it. Three exist today:
   - **who is acting** (the selected operative: `selectedIs`, `appliesTo`)
   - **who is incapacitated**
+  - **an operative's status** the player set (INSPIRING, Benedictions: `statuses`, `requiresStatus`)
 - Weapon-row notes (`+Poison +Severe · Plague Rounds`) are annotations. Stats are never rewritten.
 
 ## Layout
@@ -96,11 +97,19 @@ Every entry in `effects[]`:
 | `trigger` | A moment the app sees that should offer the ploy (`incapacitated` → Poisonous Demise). |
 | `options[]` | Sub-choices (Combat Doctrine), each with a `hint` and optional grants. |
 | `requiresOperative` | Exists only while that operative is on the roster and not incapacitated. |
+| `requiresStatus` | Applies only while its operative has that status (Inspired Strikes: INSPIRING). |
 | `alwaysOn` | Passive: always in play, never "use now". |
 | `costOverrides[]` | Discounts it grants to other effects (see below). |
 | `source` / `verify[]` / `disputed` | Provenance. `disputed` shows a red **Unverified** tag. |
 
 Census `meta` also carries `rulesVersion` (e.g. "August '26"); the app shows only this, not the PDF name.
+`meta.rosterSize` is the legal roster size (default 6; Celestian Insidiants 9), and an operative's
+`max` caps its copies (Cremators: 2).
+
+`statuses[]` (`{id, name, hint, grantsWeaponRules?, notFor?}`) are operative states the player sets
+and clears with a `STATUS` event; the app can't see them happen. While set, a status shows on its
+operative like a rule in play, with its weapon notes. This was added for Celestian Insidiants
+(INSPIRING, Ardour, Wrath) — a real vocabulary addition, not a one-off.
 
 ### Cost overrides
 
@@ -109,6 +118,8 @@ Census `meta` also carries `rulesVersion` (e.g. "August '26"); the app shows onl
 - `excludes[]`: explicit exemptions (Heroic Leader doesn't discount Command Re-roll).
 - `once_per` + `group`: a shared group means one use consumes every option of that ability (Heroic Leader).
 - `selectedIs`: only when the acting operative is that one. Otherwise it shows as a dim "can be free" hint.
+- `requiresStatus`: only while the operative granting it has that status (Holy Example, Accusing
+  Exorcist need INSPIRING). Otherwise it's a "can be free" hint too.
 - `condition`: human-readable text for what the app can't check.
 
 Vocabularies are closed (`vocab` in each census). If a card genuinely needs a new value, add it and say so.
@@ -130,7 +141,8 @@ a reviewed edit (`reconcile_2026_09.py` is the worked example), then `tools/add_
 - Glossary definitions come from the official Lite rules page, read visually, never from memory.
   Ceaseless ≠ Relentless.
 
-Both censuses were checked page by page against the August '26 PDFs on 2026-09-26. Nothing is unresolved.
+AoD and Plague Marines were checked page by page against the August '26 PDFs on 2026-09-26,
+Celestian Insidiants on 2026-09-27. Nothing is unresolved.
 
 ## Team notes
 
@@ -142,6 +154,11 @@ Both censuses were checked page by page against the August '26 PDFs on 2026-09-2
 - **Plague Marines:**
   - Champion plus 5, each operative once. There are no chapter tactics.
   - Poison is tracked by the player, not the app: rules about it are reminders.
+- **Celestian Insidiants:**
+  - Superior plus 8. Warriors repeat, Cremators up to two, the rest once. No chapter tactics.
+  - INSPIRING and the lasting Benedictions (Ardour, Wrath) are statuses the player taps on the
+    operative sheet. Restoration and Exigence are one-off, so they're text only.
+  - The Superior has two loadouts; its datacard lists every weapon from both.
 
 ## UI conventions
 
@@ -156,7 +173,9 @@ Both censuses were checked page by page against the August '26 PDFs on 2026-09-2
 - Rule names open their full text, and terms inside text open their definition. The blocks fold.
 - Chips **wrap**, never scroll sideways (`FlowLayout`).
 - One tap for the common path.
-- Operative photos are the player's own, on the phone only, never bundled or committed.
+- Operative photos and team symbols are the player's own, on the phone only, never bundled or
+  committed. Files are matched by name: `…_<operative id>` or `…_<team id>` (longest id wins).
+- The app icon is an original design, drawn by `tools/app_icon.py`. No GW artwork in the repo.
 
 ## Verification
 

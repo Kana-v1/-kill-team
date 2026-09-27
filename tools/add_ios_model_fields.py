@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Add the iOS engine's model fields to both censuses (idempotent).
+"""Add the iOS engine's model fields to the censuses (idempotent).
 
 Per effect / chapter tactic:
   when          activation | attack | defence | any — which group it shows in
@@ -88,7 +88,7 @@ PM = {
     "pm.op.flail": ("attack", S, "1AP (counts as Fight): D3+2 damage to each other operative visible and within 2\"; on a D3 of 3, enemies also gain a Poison token. Not on Conceal."),
 }
 # Ploys the app offers at a specific moment it can see (marking an operative down).
-TRIGGERS = {"pm.ff.poisonous_demise": "incapacitated"}
+TRIGGERS = {"pm.ff.poisonous_demise": "incapacitated", "ci.ff.glory_to_the_martyrs": "incapacitated"}
 PM_WEAPON_MATCH = {"pm.eq.plague_rounds": ["boltgun", "bolt pistol"]}
 PM_GRANTS = {
     "pm.strat.lumbering_death": [{"match": ["*"], "rules": ["Ceaseless"],
@@ -102,6 +102,51 @@ PM_GLOSSARY = {
                      "def": "An enemy operative with one of your Poison tokens takes 1 damage whenever it's activated. Many Plague Marine rules get stronger against poisoned enemies."},
     "Toxic": {"kind": "weapon rule · Plague Marines",
               "def": "Whenever this operative is using this weapon against an enemy operative that had one of your Poison tokens at the start of that action, add 1 to both Dmg stats of this weapon."},
+}
+
+CI = {
+    "core.ff.command_reroll": ("any", T, "After rolling your attack or defence dice, re-roll one of them."),
+    "ci.rule.inspiration": ("any", T, "Kills an enemy with 6+ Wounds, or Charges (before moving)? It becomes INSPIRING — tap its status on the operative sheet."),
+    "ci.rule.martyrdom": ("defence", T, "An INSPIRING operative is incapacitated: another friendly operative that it's visible to or within 6\" of gains a BENEDICTION."),
+    "ci.rule.benedictions": ("any", T, "Ardour +1 APL (not the Superior) or Wrath: Ceaseless, both all battle; Restoration: regain D3+2 wounds; Exigence: a free Charge (max 3\") or Dash towards the fallen one."),
+    "ci.rule.weapons_of_the_witch_hunters": ("defence", T, "Enemy PSYCHIC ranged weapons can't damage you. Within 3\" of you: no PSYCHIC actions, rules or ranged weapons; PSYCHIC melee has no rules and Dmg at most 3/4."),
+    "ci.strat.suspect_and_eliminate": ("attack", T, "Enemies with your Suspicion token: your weapons have Punishing against them."),
+    "ci.strat.suffering_and_sacrifice": ("attack", T, "Wounded operatives have Balanced when shooting, fighting or retaliating."),
+    "ci.strat.wrathful_determination": ("defence", T, "Shot while on an Engage order: re-roll one defence die."),
+    "ci.strat.holy_resilience": ("defence", T, "INSPIRING operatives fighting or retaliating: Dmg of 4 or more deals 1 less to them."),
+    "ci.ff.glory_to_the_martyrs": ("defence", T, "Incapacitated while fighting or retaliating: strike with one unresolved success first. If that kills, it becomes INSPIRING (Martyrdom)."),
+    "ci.ff.unshakeable_pursuit": ("activation", T, "Before or after an action: ignore Move changes this activation; INSPIRING also gets +1\" Move."),
+    "ci.ff.faith_and_fury": ("attack", T, "Fighting, you strike with a critical: after it, D3 damage to each other enemy visible and within 2\"."),
+    "ci.ff.fervent_hate": ("attack", T, "After rolling attack dice against a non-IMPERIUM enemy: Ceaseless this sequence (Relentless if it's CHAOS or PSYKER)."),
+    "ci.eq.psyk_out_grenades": ("attack", T, "Two stun grenades. A stun test of 3+ also deals half the roll (rounded up); full roll against a PSYKER."),
+    "ci.eq.saintly_relics": ("defence", T, "An attack die would damage you: roll a D6 (two if INSPIRING); on a 6 ignore it. Once per action, twice per battle."),
+    "ci.eq.vocifera_mortis": ("defence", T, "Once per battle, Martyrdom: the operative gaining the BENEDICTION can be anywhere."),
+    "ci.eq.auto_flagellator": ("activation", T, "On activation: roll a D6, take half (rounded up); on 4+ it becomes INSPIRING. Once per turning point."),
+    "ci.op.holy_example": ("any", S, "Once per turning point while INSPIRING: a firefight ploy for the Superior is free (Command Re-roll too)."),
+    "ci.op.spiritual_mentor": ("activation", S, "1AP: a friendly operative visible and within 6\" becomes INSPIRING. Once per turning point; not in enemy control range."),
+    "ci.op.holy_defender": ("defence", S, "Once per turning point: a friend within 2\" is shot or fought — the Abjuror takes it instead (not Blast or Torrent)."),
+    "ci.op.censor_icon_bearer": ("any", S, "Counts as 1 higher APL when determining marker control."),
+    "ci.op.null_field": ("defence", S, "Enemies in its null range: −2\" Move and −1 Hit."),
+    "ci.op.nullifying_ritual": ("activation", S, "1AP: null range +1\" (max 5\"). Once per turning point; not in enemy control range."),
+    "ci.op.inspirational_pyre": ("attack", S, "Once per turning point: the hand flamer damages but doesn't kill → a friend within 6\" becomes INSPIRING."),
+    "ci.op.accusing_exorcist": ("any", S, "While INSPIRING: Suspect & Eliminate is free if the Denuncia can see, or is within 6\" of, your pick."),
+    "ci.op.speak_of_her_deeds": ("activation", S, "1AP: an INSPIRING friend within 6\" stops being INSPIRING; another gets a BENEDICTION (not Exigence)."),
+    "ci.op.zealous_ultimatum": ("any", S, "Once per battle, Strategic gambit: challenge an enemy within 8\". Accepted: +1 Atk against it. Declined: it gets −1 Atk against you."),
+    "ci.op.bladed_stance": ("attack", S, "Fighting or retaliating: resolve one success early — it must block."),
+    "ci.op.reliquarius_icon_bearer": ("any", S, "Enemies contesting a marker within 3\" of it count as 1 lower total APL."),
+    "ci.op.devotion": ("activation", S, "End of activation, INSPIRING and holding a marker: a friend within 6\" becomes INSPIRING."),
+    "ci.op.inspired_strikes": ("attack", S, "While INSPIRING: +1 Critical Dmg on its weapons."),
+}
+CI_GRANTS = {
+    "ci.strat.suspect_and_eliminate": [{"match": ["*"], "rules": ["Punishing"], "condition": "against an enemy with your Suspicion token"}],
+    "ci.strat.suffering_and_sacrifice": [{"match": ["*"], "rules": ["Balanced"], "condition": "if this operative is wounded"}],
+}
+CI_GLOSSARY = {
+    "INSPIRING": {"kind": "status · Celestian Insidiants", "def": "An operative becomes INSPIRING when it incapacitates an enemy with a Wounds stat of 6 or more, when it performs the Charge action (before it moves), or through rules like Spiritual Mentor. While INSPIRING, weapons on its datacard have Severe; if it's incapacitated, Martyrdom gives another friendly operative a BENEDICTION."},
+    "BENEDICTION": {"kind": "faction rule · Celestian Insidiants", "def": "Gained through Martyrdom. Ardour: +1 APL for the battle (not a Superior). Wrath: weapons on its datacard have Ceaseless for the battle. Restoration: regain up to D3+2 lost wounds. Exigence: a free Charge (max 3\") or Dash, ending closer to the incapacitated INSPIRING operative."},
+    "Anti-PSYKER": {"kind": "weapon rule · Celestian Insidiants", "def": "Whenever this weapon is being used against an operative that has the PSYKER keyword, it has the Lethal 5+ weapon rule."},
+    "Shield": {"kind": "weapon rule · Celestian Insidiants", "def": "Whenever this operative is fighting or retaliating with this weapon profile, each of your blocks can be allocated to block two unresolved successes (instead of one)."},
+    "Suspicion token": {"kind": "token · Celestian Insidiants", "def": "From Suspect & Eliminate, until the end of the turning point. Whenever a friendly operative is shooting against or fighting against an operative with one of your Suspicion tokens, its weapons have Punishing."},
 }
 
 VOCAB_ADD = {
@@ -145,3 +190,4 @@ def apply(team, table, grants, weapon_match, option_grants=None, tactics=None, g
 
 apply("aod", AOD, AOD_GRANTS, {}, AOD_OPTION_GRANTS, AOD_TACTICS)
 apply("plague_marines", PM, PM_GRANTS, PM_WEAPON_MATCH, glossary=PM_GLOSSARY)
+apply("celestian_insidiants", CI, CI_GRANTS, {}, glossary=CI_GLOSSARY)

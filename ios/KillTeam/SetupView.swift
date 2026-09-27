@@ -24,7 +24,11 @@ struct SetupView: View {
                             if t.id != store.game.team { pendingTeam = t }
                         } label: {
                             HStack {
-                                Circle().fill(Theme.accent(t.id)).frame(width: 10, height: 10)
+                                if let symbol = store.teamSymbol(for: t.id) {
+                                    Image(uiImage: symbol).resizable().scaledToFit().frame(width: 28, height: 28)
+                                } else {
+                                    Circle().fill(Theme.accent(t.id)).frame(width: 10, height: 10).frame(width: 28)
+                                }
                                 Text(t.name).foregroundStyle(Theme.text)
                                 Spacer()
                                 if t.id == store.game.team { Image(systemName: "checkmark").foregroundStyle(Theme.link) }
@@ -53,7 +57,7 @@ struct SetupView: View {
                         if o.multiple {
                             Stepper(value: Binding(get: { count(o.id) }, set: { new in
                                 store.send(Event(.count, Params(d: new > count(o.id) ? 1 : -1, id: o.id)))
-                            }), in: 0...6) {
+                            }), in: 0...store.engine.maxCount(o.id)) {
                                 Text("\(o.name) · \(count(o.id))")
                             }
                         } else {
@@ -95,8 +99,18 @@ struct SetupView: View {
                     LabeledContent("Have photos", value: "\(photoCount) of \(rules.operatives.count)")
                     Button("Import photos…") { importing = true }
                     if let importResult { Text(importResult).font(.footnote).foregroundStyle(Theme.text2) }
-                } header: { Text("Operative photos") } footer: {
-                    Text("Name each file after its operative (e.g. plague_marine_champion.png). You can also drop them into Kill Team's folder in the Files app; they're picked up when the app opens. To set one photo, tap the portrait on an operative.")
+                    DisclosureGroup("File names for \(rules.meta.team)") {
+                        ForEach(rules.operatives, id: \.id) { o in
+                            LabeledContent(o.name) {
+                                Text("…_\(o.id)").font(.caption.monospaced()).textSelection(.enabled)
+                            }
+                        }
+                        LabeledContent("Team symbol") {
+                            Text("…_\(store.game.team)").font(.caption.monospaced()).textSelection(.enabled)
+                        }
+                    }
+                } header: { Text("Photos and team symbol") } footer: {
+                    Text("A file's name must end with _ and the operative's id, e.g. my_champion_plague_marine_champion.png; the team symbol ends with the team's id, e.g. ci_celestian_insidiants.png. Import several at once, or drop them into Kill Team's folder in the Files app; they're picked up when the app opens. To set one operative's photo, or take one with the camera, tap its portrait.")
                 }
 
                 Section {
@@ -126,7 +140,7 @@ struct SetupView: View {
             .fileImporter(isPresented: $importing, allowedContentTypes: [.image], allowsMultipleSelection: true) { result in
                 guard case .success(let urls) = result else { return }
                 let r = store.importPhotos(from: urls)
-                importResult = "Added \(r.matched)." + (r.unmatched.isEmpty ? "" : " Didn't match: " + r.unmatched.joined(separator: ", "))
+                importResult = "Added \(r.matched)." + (r.unmatched.isEmpty ? "" : " Names didn't end with an operative or team id: " + r.unmatched.joined(separator: ", "))
             }
             .ruleInfo(store.engine)
             .confirmationDialog("Reset the whole game?", isPresented: $confirmReset, titleVisibility: .visible) {
@@ -139,7 +153,7 @@ struct SetupView: View {
     private func count(_ id: String) -> Int { snap.roster.filter { typeOf($0) == id }.count }
 
     private var rosterLabel: String {
-        "\(snap.rosterStatus.total) of 6" + (snap.rosterStatus.leaders == 1 ? "" : " · no leader")
+        "\(snap.rosterStatus.total) of \(store.engine.rosterSize)" + (snap.rosterStatus.leaders == 1 ? "" : " · no leader")
     }
 
     private var photoCount: Int { rules.operatives.filter { store.photo(for: $0.id) != nil }.count }

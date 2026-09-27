@@ -6,12 +6,15 @@ printed side by side come out interleaved line by line ("CONTAGION   LUMBERING
 DEATH", then both first lines, ...). This uses the per-item x/y coordinates in
 lit's JSON to split two-column pages at the gutter and emit each column whole.
 
-Datacard pages (they carry the APL/MOVE/SAVE/WOUNDS header) are left as rows:
-there the columns are table cells, and splitting would cut weapon rows apart.
+Datacard pages (they carry the APL/MOVE/SAVE/WOUNDS header) mix both: the
+stat header, weapon table and keyword footer are rows that must stay whole,
+while the ability text below the table runs in two columns. Table lines are
+kept intact; everything else is split at the gutter like any other page.
 
 Usage: columns.py data/extracted/<team>.json > data/extracted/<team>.cols.txt
 """
 import json
+import re
 import sys
 
 
@@ -32,11 +35,25 @@ def join(items):
     return " ".join(i["text"].strip() for i in items if i["text"].strip())
 
 
+WEAPON_ROW = re.compile(r".+\s\d+\s+\d\+\s+\d+/\d+")
+
+
+def is_table_line(text):
+    """A datacard line that must stay whole: header, stats, weapon row, footer."""
+    t = text.strip()
+    return bool(
+        re.search(r"\bAPL\b.*\bMOVE\b|\bNAME\b.*\bATK\b", t)
+        or WEAPON_ROW.match(t)
+        or re.fullmatch(r'[\d\s"”+]+', t)
+        or ("," in t and t.upper() == t and re.search(r"\d+$", t))
+        or "RULES CONTINUE ON OTHER SIDE" in t
+    )
+
+
 def page_text(page):
     items = [i for i in page["textItems"] if i["text"].strip()]
     lines = lines_of(items)
-    if any("WOUNDS" in i["text"] for i in items):
-        return "\n".join(join(ln["items"]) for ln in lines)
+    datacard = any("WOUNDS" in i["text"] for i in items)
 
     mid = page["width"] / 2
     out, left, right = [], [], []
@@ -56,7 +73,7 @@ def page_text(page):
         L = [i for i in ln["items"] if i["x"] + i["width"] <= mid + 2]
         R = [i for i in ln["items"] if i["x"] >= mid - 2]
         spanning = [i for i in ln["items"] if i not in L and i not in R]
-        if spanning:
+        if spanning or (datacard and is_table_line(join(ln["items"]))):
             flush()
             out.append(join(ln["items"]))
             continue

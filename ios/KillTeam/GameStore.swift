@@ -106,8 +106,17 @@ final class GameStore: ObservableObject {
     }
 
     @discardableResult
-    func setPhoto(_ data: Data, for operativeId: String) -> Bool {
-        guard let img = UIImage(data: data), let png = GameStore.square(img, side: 256).pngData() else {
+    func setPhoto(_ data: Data, for operativeId: String, fit: Bool = false) -> Bool {
+        guard let img = UIImage(data: data) else {
+            Log.write("photo for \(operativeId): not an image", "photos")
+            return false
+        }
+        return setPhoto(img, for: operativeId, fit: fit)
+    }
+
+    @discardableResult
+    func setPhoto(_ img: UIImage, for operativeId: String, fit: Bool = false) -> Bool {
+        guard let png = GameStore.square(img, side: 256, fit: fit).pngData() else {
             Log.write("photo for \(operativeId): not an image", "photos")
             return false
         }
@@ -128,8 +137,14 @@ final class GameStore: ObservableObject {
         photoVersion += 1
     }
 
-    /// Imports image files named after operatives ("plague_marine_champion.png"
-    /// or "Plague Marine Champion.jpg"). Returns how many matched.
+    /// Team symbols live beside the photos as team_<team id>.png, kept square
+    /// and transparent (fitted, not cropped).
+    func teamSymbol(for team: String) -> UIImage? { photo(for: "team_\(team)") }
+
+    /// Imports image files whose names end with an operative id
+    /// ("my_champion_plague_marine_champion.png", or just "plague_marine_champion.png",
+    /// or the operative's name) or a team id for its symbol ("ci_celestian_insidiants.png").
+    /// Returns how many matched.
     @discardableResult
     func importPhotos(from urls: [URL]) -> (matched: Int, unmatched: [String]) {
         var matched = 0
@@ -138,7 +153,8 @@ final class GameStore: ObservableObject {
             let scoped = url.startAccessingSecurityScopedResource()
             defer { if scoped { url.stopAccessingSecurityScopedResource() } }
             let stem = url.deletingPathExtension().lastPathComponent
-            guard let id = operativeId(matching: stem), let data = try? Data(contentsOf: url), setPhoto(data, for: id) else {
+            guard let id = operativeId(matching: stem), let data = try? Data(contentsOf: url),
+                  setPhoto(data, for: id, fit: id.hasPrefix("team_")) else {
                 unmatched.append(url.lastPathComponent)
                 continue
             }
@@ -163,14 +179,21 @@ final class GameStore: ObservableObject {
         if photoVersion != before { toast = "Added \(result.matched) operative photo\(result.matched == 1 ? "" : "s")." }
     }
 
+    /// The photo slot a file name points at: an operative id or "team_<id>".
+    /// The name must be the id or end with "_<id>"; the longest id wins, so
+    /// "…_plague_marine_warrior" isn't taken for a shorter id it ends with.
     private func operativeId(matching stem: String) -> String? {
         let key = GameStore.slug(stem)
-        for engine in engines.values {
-            for op in engine.rules.operatives where op.id == key || GameStore.slug(op.name) == key {
-                return op.id
+        var slots: [(id: String, slot: String)] = []
+        for (team, engine) in engines {
+            slots.append((team, "team_\(team)"))
+            for op in engine.rules.operatives {
+                if GameStore.slug(op.name) == key { return op.id }
+                slots.append((op.id, op.id))
             }
         }
-        return nil
+        return slots.filter { key == $0.id || key.hasSuffix("_" + $0.id) }
+            .max { $0.id.count < $1.id.count }?.slot
     }
 
     private static func slug(_ s: String) -> String {
@@ -179,13 +202,14 @@ final class GameStore: ObservableObject {
             .trimmingCharacters(in: CharacterSet(charactersIn: "_"))
     }
 
-    /// Centre-cropped square, scaled to `side` points at 1x.
-    private static func square(_ img: UIImage, side: CGFloat) -> UIImage {
-        let s = min(img.size.width, img.size.height)
+    /// Centre-cropped square (or the whole image fitted inside it), `side` points at 1x.
+    private static func square(_ img: UIImage, side: CGFloat, fit: Bool = false) -> UIImage {
+        let s = fit ? max(img.size.width, img.size.height) : min(img.size.width, img.size.height)
         let scale = side / s
         let drawSize = CGSize(width: img.size.width * scale, height: img.size.height * scale)
         let format = UIGraphicsImageRendererFormat.default()
         format.scale = 1
+        format.opaque = false
         return UIGraphicsImageRenderer(size: CGSize(width: side, height: side), format: format).image { _ in
             img.draw(in: CGRect(x: (side - drawSize.width) / 2, y: (side - drawSize.height) / 2,
                                 width: drawSize.width, height: drawSize.height))

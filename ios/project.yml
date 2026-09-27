@@ -53,3 +53,4 @@ targets:
         UIFileSharingEnabled: true
         LSSupportsOpeningDocumentsInPlace: true
         NSPhotoLibraryUsageDescription: Pick a photo of your model for an operative's portrait.
+        NSCameraUsageDescription: Take a photo of your model for an operative's portrait.

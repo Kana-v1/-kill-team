@@ -65,6 +65,9 @@ def find_datacards(txt):
                 stats = {"apl": int(m.group(1)), "move": m.group(2), "save": m.group(3), "wounds": int(m.group(4))}
                 continue
             w = re.match(r'^(.+?)\s+(\d+)\s+(\d\+)\s+(\d+/\d+)\s*(.*)$', n)
+            if not w and weapons and weapons[-1]["rules"].endswith(",") and n and len(n) < 60:
+                weapons[-1]["rules"] += " " + n  # rules wrapped onto the next line
+                continue
             if w and not n.startswith("NAME"):
                 weapons.append({"name": w.group(1).strip(), "atk": int(w.group(2)), "hit": w.group(3),
                                 "dmg": w.group(4), "rules": w.group(5).strip()})

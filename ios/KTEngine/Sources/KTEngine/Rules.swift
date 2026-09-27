@@ -13,6 +13,8 @@ public struct RulesData: Codable {
     public var chapterTactics: [ChapterTactic]
     /// Faction terms (Poison, Toxic, …) for the tappable glossary.
     public var glossary: [String: GlossaryEntry]?
+    /// Operative states the player sets and the app tracks (INSPIRING, Benedictions).
+    public var statuses: [StatusDef]?
 
     public static func load(from url: URL) throws -> RulesData {
         try JSONDecoder().decode(RulesData.self, from: Data(contentsOf: url))
@@ -26,6 +28,8 @@ public struct Meta: Codable {
     public var sourcePdf: String?
     public var rulesVersion: String?
     public var defaultRoster: [String]?
+    /// Operatives in a legal roster (6 unless the team says otherwise).
+    public var rosterSize: Int?
     public var unresolved: [String]?
 }
 
@@ -65,11 +69,13 @@ public struct Effect: Codable {
     public var grantsWeaponRules: [Grant]?
     /// A moment the app itself sees that should offer this ploy ("incapacitated").
     public var trigger: String?
+    /// Only applies while the operative it's for has this status.
+    public var requiresStatus: String?
 
     enum CodingKeys: String, CodingKey {
         case id, name, kind, universal, cost, duration, text, options, requiresOperative, alwaysOn,
              costOverride, costOverrides, changesOptionOf, requires, disputed, verify,
-             when, appliesTo, weaponMatch, hint, grantsWeaponRules, trigger
+             when, appliesTo, weaponMatch, hint, grantsWeaponRules, trigger, requiresStatus
         case oncePer = "once_per"
     }
 
@@ -103,9 +109,11 @@ public struct Override: Codable {
     public var group: String?
     public var selectedIs: String?
     public var condition: String?
+    /// Only while the operative granting the discount has this status.
+    public var requiresStatus: String?
 
     enum CodingKeys: String, CodingKey {
-        case effect, kind, options, excludes, cp, group, selectedIs, condition
+        case effect, kind, options, excludes, cp, group, selectedIs, condition, requiresStatus
         case oncePer = "once_per"
     }
 }
@@ -136,6 +144,19 @@ public struct Operative: Codable {
     public var multiple: Bool
     public var role: String
     public var chapterVeteran: Bool
+    /// Most copies allowed in a roster (Cremators: 2). Nil: one, or any for `multiple`.
+    public var max: Int?
+}
+
+/// A state an operative is in until the player clears it (the app can't see
+/// it happen). While set it shows on that operative with its hint and weapon notes.
+public struct StatusDef: Codable, Equatable {
+    public var id: String
+    public var name: String
+    public var hint: String
+    public var grantsWeaponRules: [Grant]?
+    /// Operative types that can't have it (Ardour: not a Superior).
+    public var notFor: [String]?
 }
 
 public struct Stats: Codable, Equatable {

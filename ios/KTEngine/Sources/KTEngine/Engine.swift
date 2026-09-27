@@ -35,6 +35,8 @@ public struct Event: Codable, Equatable {
         case equip = "EQUIP"
         case tactic = "TACTIC"
         case clearSummary = "CLEAR_SUMMARY"
+        /// Toggle status `opt` on operative instance `id`.
+        case status = "STATUS"
     }
 }
 
@@ -99,6 +101,12 @@ public struct GameState {
     public var paid: [Paid] = []
     public var lastSummary: Summary?
     public var seq = 0
+    /// Operative instance → status ids (INSPIRING, Benedictions).
+    public var statuses: [String: Set<String>] = [:]
+
+    public func has(_ inst: String, _ status: String) -> Bool {
+        statuses[inst]?.contains(status) ?? false
+    }
 }
 
 /// Durations that end when a different operative starts acting.
@@ -116,6 +124,7 @@ public final class Engine {
     let opById: [String: Operative]
     let leaders: Set<String>
     public let defaultRoster: [String]
+    public let rosterSize: Int
     let glossary: Glossary
 
     public init(teamId: String, rules: RulesData, core: CoreGlossary) {
@@ -125,18 +134,31 @@ public final class Engine {
         opById = Dictionary(rules.operatives.map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a })
         leaders = Set(rules.operatives.filter(\.leader).map(\.id))
         defaultRoster = Engine.resolveDefaultRoster(rules)
+        rosterSize = rules.meta.rosterSize ?? 6
         glossary = Glossary(core: core, rules: rules)
     }
 
-    /// The team's declared starting six, or its leader plus the first specialists.
+    /// The team's declared starting roster, or its leader plus the first specialists.
     static func resolveDefaultRoster(_ rules: RulesData) -> [String] {
         if let r = rules.meta.defaultRoster, !r.isEmpty { return r }
         let leader = rules.operatives.first(where: \.leader).map { [$0.id] } ?? []
-        return Array((leader + rules.operatives.filter { !$0.leader }.map(\.id)).prefix(6))
+        return Array((leader + rules.operatives.filter { !$0.leader }.map(\.id)).prefix(rules.meta.rosterSize ?? 6))
     }
 
     public func effect(_ id: String) -> Effect? { byId[id] }
     public func operative(_ inst: String) -> Operative? { opById[typeOf(inst)] }
+
+    /// How many of this operative type a roster may hold.
+    public func maxCount(_ type: String) -> Int {
+        guard let o = opById[type] else { return 0 }
+        if let m = o.max { return m }
+        return o.multiple ? rosterSize : 1
+    }
+
+    /// Statuses this operative type can have.
+    public func statuses(for inst: String) -> [StatusDef] {
+        (rules.statuses ?? []).filter { !($0.notFor ?? []).contains(typeOf(inst)) }
+    }
 
     // MARK: fold
 
@@ -231,6 +253,7 @@ public final class Engine {
         case .count:
             guard let id = p.id else { return }
             if (p.d ?? 0) > 0 {
+                guard s.roster.filter({ typeOf($0) == id }).count < maxCount(id) else { return }
                 var n = 1
                 while s.roster.contains("\(id)#\(n)") { n += 1 }
                 s.roster.append("\(id)#\(n)")
@@ -257,7 +280,15 @@ public final class Engine {
 
         case .clearSummary:
             s.lastSummary = nil
+
+        case .status:
+            guard let st = p.opt else { return }
+            let inst = p.id ?? s.op
+            guard s.roster.contains(inst), statuses(for: inst).contains(where: { $0.id == st }) else { return }
+            if s.has(inst, st) { s.statuses[inst]?.remove(st) } else { s.statuses[inst, default: []].insert(st) }
         }
+        // A status belongs to an operative on the roster.
+        s.statuses = s.statuses.filter { s.roster.contains($0.key) && !$0.value.isEmpty }
     }
 
     func clearTurningPoint(_ s: inout GameState) {
@@ -314,6 +345,10 @@ public final class Engine {
                 if ov.excludes?.contains(e.id) == true { continue }
                 if let opts = ov.options, let o = opt, !opts.contains(o) { continue }
                 let wrongOperative = ov.selectedIs.map { typeOf(s.op) != $0 } ?? false
+                // the operative granting it must have the status (if the player hasn't set it, a hint)
+                let missingStatus = ov.requiresStatus.map { st in
+                    !s.roster.contains { typeOf($0) == p.requiresOperative && !s.dead.contains($0) && s.has($0, st) }
+                } ?? false
                 // a shared group means one use covers every option of that ability
                 let scope = ov.group ?? "\(e.id)|\(ov.options != nil ? (opt ?? "*") : "*")"
                 let key = ov.oncePer != nil ? "\(p.id)|\(scope)" : nil
@@ -321,7 +356,7 @@ public final class Engine {
                 if let key, ov.oncePer == "turning_point", s.usedTp[key] == s.tp { continue }
                 out.append(Route(cp: ov.cp, condition: ov.condition, from: p.name, options: ov.options,
                                  key: key, once: ov.oncePer, disputed: p.disputed ?? false,
-                                 inactive: wrongOperative, needs: ov.selectedIs))
+                                 inactive: wrongOperative || missingStatus, needs: ov.selectedIs))
             }
         }
         return out

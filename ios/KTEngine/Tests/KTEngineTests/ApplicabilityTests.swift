@@ -28,6 +28,11 @@ final class ApplicabilityTests: XCTestCase {
                 let weapons = e.operative(inst)!.weapons.map { $0.name.lowercased() }
                 for eff in e.rules.effects where eff.isAlwaysOn && e.present(e.fold(base), eff) {
                     let shown = v.activeIds.contains(eff.id)
+                    if eff.requiresStatus != nil {
+                        // nobody has a status in this log, so it shows nowhere yet
+                        XCTAssertFalse(shown, "\(team): \(eff.name) needs a status")
+                        continue
+                    }
                     switch eff.appliesTo ?? .team {
                     case .team:
                         XCTAssertTrue(shown, "\(team): \(eff.name) is team-wide but hidden on \(inst)")

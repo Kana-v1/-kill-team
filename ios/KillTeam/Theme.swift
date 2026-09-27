@@ -22,11 +22,13 @@ enum Theme {
     static let link = Color(hex: 0x4DA3FF)
     static let selected = Color(hex: 0x636366)
 
-    /// Per-team accent (sickly lime for Plague Marines, cobalt for Angels of Death).
+    /// Per-team accent (sickly lime for Plague Marines, cobalt for Angels of Death,
+    /// reliquary gold for Celestian Insidiants).
     static func accent(_ team: String) -> Color {
         switch team {
         case "plague_marines": return Color(hex: 0xB5D96B)
         case "aod": return Color(hex: 0x8CB8FF)
+        case "celestian_insidiants": return Color(hex: 0xE8C27A)
         default: return Color(hex: 0xE6A94A)
         }
     }

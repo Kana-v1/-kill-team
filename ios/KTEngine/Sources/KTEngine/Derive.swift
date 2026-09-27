@@ -25,6 +25,16 @@ public struct Snapshot {
     /// Weapon-rule notes for the selected operative, keyed by weapon name.
     public var weaponNotes: [String: [WeaponNote]]
     public var summary: Summary?
+    /// Statuses the selected operative can have, and whether it has them.
+    public var statuses: [StatusChip]
+    /// Operative instance → names of the statuses it has, for roster chips.
+    public var statusNames: [String: [String]]
+}
+
+public struct StatusChip: Equatable {
+    public var id: String
+    public var name: String
+    public var on: Bool
 }
 
 public struct CardGroup<Card> {
@@ -110,6 +120,7 @@ public struct WeaponNote: Equatable {
 let kindLabels = [
     "strategy_ploy": "Strategy ploy", "firefight_ploy": "Firefight ploy", "equipment": "Equipment",
     "faction_rule": "Faction rule", "operative_ability": "Ability", "chapter_tactic": "Chapter tactic",
+    "status": "Status",
 ]
 
 extension Engine {
@@ -147,6 +158,11 @@ extension Engine {
             inPlay.append(InPlay(tactic: t, slot: slot))
         }
 
+        // The selected operative's statuses read like any other rule in play.
+        for st in statuses(for: s.op) where s.has(s.op, st.id) {
+            inPlay.append(InPlay(status: st))
+        }
+
         // Split what's in play into "for this operative" and "for others".
         var mine: [InPlay] = []
         var elsewhere: [Elsewhere] = []
@@ -170,7 +186,11 @@ extension Engine {
             elsewhere: elsewhere,
             spent: spent,
             weaponNotes: weaponNotes(s, mine),
-            summary: s.lastSummary
+            summary: s.lastSummary,
+            statuses: statuses(for: s.op).map { StatusChip(id: $0.id, name: $0.name, on: s.has(s.op, $0.id)) },
+            statusNames: s.statuses.mapValues { set in
+                (rules.statuses ?? []).filter { set.contains($0.id) }.map(\.name)
+            }
         )
     }
 
@@ -218,6 +238,7 @@ extension Engine {
         var oncePerBattle: Bool
         var slot: String?
         var disputed: Bool
+        var requiresStatus: String?
 
         init(effect e: Effect, opt: String?, slot: String?, always: Bool) {
             let option = opt.flatMap { o in e.options?.first(where: { $0.id == o }) }
@@ -235,6 +256,30 @@ extension Engine {
             oncePerBattle = e.oncePer == "battle"
             self.slot = slot
             disputed = e.disputed ?? false
+            requiresStatus = e.requiresStatus
+        }
+
+        init(status st: StatusDef) {
+            id = "status.\(st.id)"
+            name = st.name
+            kind = "status"
+            when = .any
+            appliesTo = .team // only ever built for the selected operative
+            requiresOperative = nil
+            weaponMatch = []
+            hint = st.hint
+            grants = st.grantsWeaponRules ?? []
+            duration = "status"
+            always = true
+            oncePerBattle = false
+            slot = nil
+            disputed = false
+        }
+
+        /// The same item without its status requirement.
+        init(copy: InPlay) {
+            self = copy
+            requiresStatus = nil
         }
 
         init(tactic t: ChapterTactic, slot: String) {
@@ -258,6 +303,7 @@ extension Engine {
     }
 
     func appliesToSelected(_ item: InPlay, _ s: GameState, veterans: [String]) -> Bool {
+        if let st = item.requiresStatus, !s.has(s.op, st) { return false }
         switch item.appliesTo {
         case .team:
             return true
@@ -271,6 +317,11 @@ extension Engine {
     }
 
     func whoFor(_ item: InPlay, veterans: [String]) -> String {
+        if let st = item.requiresStatus {
+            let name = rules.statuses?.first(where: { $0.id == st })?.name ?? st
+            let base = item.appliesTo == .self ? whoFor(InPlay(copy: item), veterans: veterans) : "operatives"
+            return "\(base), while \(name.uppercased())"
+        }
         switch item.appliesTo {
         case .self where item.kind == "chapter_tactic":
             return veterans.compactMap { operative($0)?.name }.joined(separator: " / ") + " only"
@@ -285,7 +336,9 @@ extension Engine {
 
     func activeCard(_ item: InPlay) -> ActiveCard {
         let life: String
-        if item.always {
+        if item.kind == "status" {
+            life = "until you clear it"
+        } else if item.always {
             life = item.oncePerBattle ? "once per battle" : "always"
         } else {
             switch item.duration {
@@ -344,7 +397,7 @@ extension Engine {
 
     func rosterStatus(_ s: GameState) -> RosterStatus {
         let leaderCount = s.roster.filter { leaders.contains(typeOf($0)) }.count
-        return RosterStatus(total: s.roster.count, leaders: leaderCount, ok: s.roster.count == 6 && leaderCount == 1)
+        return RosterStatus(total: s.roster.count, leaders: leaderCount, ok: s.roster.count == rosterSize && leaderCount == 1)
     }
 
     func kindLabel(_ e: Effect, slot: String?) -> String {
@@ -381,6 +434,10 @@ extension Engine {
         let version = rules.meta.rulesVersion
         if id.hasPrefix("tactic."), let t = rules.chapterTactics.first(where: { "tactic.\($0.id)" == id }) {
             return RuleInfo(title: t.name, kind: "Chapter tactic", body: segments(t.text, excluding: t.name),
+                            options: [], version: version)
+        }
+        if id.hasPrefix("status."), let st = rules.statuses?.first(where: { "status.\($0.id)" == id }) {
+            return RuleInfo(title: st.name, kind: "Status", body: segments(st.hint, excluding: st.name),
                             options: [], version: version)
         }
         guard let e = byId[id] else { return nil }
