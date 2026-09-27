@@ -35,9 +35,9 @@ There's no Mac: **GitHub Actions is the iOS compiler.** Every push touching
 - builds an unsigned `KillTeam.ipa` artifact, which you install with Sideloadly
 
 ```bash
-gh run list -R Kana-v1/-kill-team            # builds
-gh run download <run-id> -R Kana-v1/-kill-team
-gh run view <run-id> -R Kana-v1/-kill-team --log-failed
+gh run list -R Kana-v1/kt-hinter            # builds
+gh run download <run-id> -R Kana-v1/kt-hinter
+gh run view <run-id> -R Kana-v1/kt-hinter --log-failed
 ```
 
 The engine tests also run locally on Linux, with Swift installed at `~/sdk/swift`:
